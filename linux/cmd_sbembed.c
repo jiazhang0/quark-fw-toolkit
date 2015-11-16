@@ -39,8 +39,9 @@ static char *opt_output_file = DEF_OUTPUT_NAME;
 static void
 show_usage(void)
 {
-	info_cont(T("\t--output-file, -o: (optional) The output file name to ")
-		  T("override the default name \"%s\"\n"), DEF_OUTPUT_NAME);
+	info_cont(T("\t--output-file, -o: (optional) The output file name ")
+		  T("to override the default name \"%s\"\n"),
+		  DEF_OUTPUT_NAME);
 	info_cont(T("\t--pk, -p: Specify DER formatted PK file\n"));
 	info_cont(T("\t--kek, -k: Specify DER formatted KEK file\n"));
 	info_cont(T("\t--db, -d: Specify DER formatted DB file\n"));

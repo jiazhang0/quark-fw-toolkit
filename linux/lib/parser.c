@@ -34,7 +34,8 @@
 #include "buffer_stream.h"
 
 err_status_t
-cln_fw_parser_create(void *fw, unsigned long fw_len, cln_fw_parser_t **out)
+cln_fw_parser_create(void *fw, unsigned long fw_len,
+		     cln_fw_parser_t **out)
 {
 	cln_fw_parser_t *parser;
 
@@ -165,8 +166,8 @@ cln_fw_parser_parse(cln_fw_parser_t *parser)
 }
 
 err_status_t
-cln_fw_parser_embed_key(cln_fw_parser_t *parser, cln_fw_sb_key_t key, void *in,
-			unsigned long in_len)
+cln_fw_parser_embed_key(cln_fw_parser_t *parser, cln_fw_sb_key_t key,
+			void *in, unsigned long in_len)
 {
 	buffer_stream_t *pdata;
 	uint16_t id;
@@ -185,7 +186,8 @@ cln_fw_parser_embed_key(cln_fw_parser_t *parser, cln_fw_sb_key_t key, void *in,
 		cln_fw_pdata_entry_t *entry, *tmp;
 
 		dbg(T("Updating platform entry ID %d ...\n"), id);
-		bcll_for_each_link_safe(entry, tmp, &parser->pdata_entry_list, link) {
+		bcll_for_each_link_safe(entry, tmp,
+				&parser->pdata_entry_list, link) {
 			uint16_t pdata_entry_id;
 			uint32_t header;
 			void *pdata_entry = bs_head(&entry->bs);
@@ -198,7 +200,6 @@ cln_fw_parser_embed_key(cln_fw_parser_t *parser, cln_fw_sb_key_t key, void *in,
 				break;
 
 			header = platform_data_cert_header(pdata_entry);
-printf("req %x, detected header %x, act %x/%x\n", key, header, PDATA_KEK_CERT_HEADER, PDATA_DB_CERT_HEADER);
 			if (header == PDATA_KEK_CERT_HEADER
 					&& key == CLN_FW_SB_KEY_KEK)
 				break;

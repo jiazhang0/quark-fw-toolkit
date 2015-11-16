@@ -58,16 +58,19 @@ show_version(void)
 static void
 show_usage(const tchar_t *prog)
 {
-	info_cont(T("\nusage: %s <options> <command> <file> [<args>]\n"), prog);
+	info_cont(T("\nusage: %s <options> <command> <file> [<args>]\n"),
+		  prog);
 	info_cont(T("\noptions:\n"));
 	info_cont(T("  --help, -h: Print this help information\n"));
 	info_cont(T("  --version, -V: Show version number\n"));
 	info_cont(T("  --verbose, -v: Show verbose messages\n"));
 	info_cont(T("  --quite, -q: Don't show banner information\n"));
 	info_cont(T("\ncommand:\n"));
-	info_cont(T("  help: Display the help information for the specified command\n"));
+	info_cont(T("  help: Display the help information for the ")
+		  T("specified command\n"));
 	info_cont(T("  show: Display the details of firmware\n"));
-	info_cont(T("  sbembed: Embed the keys for UEFI Secure Boot enablement\n"));
+	info_cont(T("  sbembed: Embed the keys for UEFI Secure Boot ")
+		  T("enablement\n"));
 	info_cont(T("\nfile:\n"));
 	info_cont(T("  Input file to be parsed\n"));
 	info_cont(T("\nargs:\n"));
@@ -77,7 +80,8 @@ show_usage(const tchar_t *prog)
 int
 cln_fwtool_add_command(cln_fwtool_command_t *cmd)
 {
-	if (!cmd->name || !cmd->optstring || !cmd->long_opts || !cmd->parse_arg)
+	if (!cmd->name || !cmd->optstring || !cmd->long_opts
+			|| !cmd->parse_arg)
 		return -1;
 
 	if (cln_fwtool_nr_command >= CLN_FWTOOL_MAX_COMMANDS)
@@ -108,7 +112,8 @@ parse_command(char *command, int argc, tchar_t *argv[])
 	while (1) {
 		int opt;
 
-		opt = getopt_long(argc, argv, cmd->optstring, cmd->long_opts, NULL);
+		opt = getopt_long(argc, argv, cmd->optstring,
+				  cmd->long_opts, NULL);
 		if (opt == -1)
 			break;
 
@@ -185,7 +190,8 @@ parse_options(int argc, tchar_t *argv[])
 		case 1:
 			index = optind;
 			optind = 1;
-			if (parse_command(optarg, argc - index + 1, argv + index - 1)) {
+			if (parse_command(optarg, argc - index + 1,
+					  argv + index - 1)) {
 				err(T("Unrecognized command %s.\n"), optarg);
 				show_usage(argv[0]);
 				exit(EXIT_FAILURE);

@@ -56,7 +56,8 @@ typedef struct {
 } cln_fw_parser_t;
 
 err_status_t
-cln_fw_parser_create(void *fw, unsigned long fw_len, cln_fw_parser_t **out);
+cln_fw_parser_create(void *fw, unsigned long fw_len,
+		     cln_fw_parser_t **out);
 
 void
 cln_fw_parser_destroy(cln_fw_parser_t *parser);
@@ -142,8 +143,9 @@ platform_data_create_entry(uint16_t id, uint16_t version, const char desc[10],
 err_status_t
 platform_data_update_entry(void *pdata_entry_buf,
 			   unsigned long pdata_entry_buf_len,
-			   uint16_t id, uint16_t *version, const char desc[10],
-			   uint8_t *data, uint16_t data_len, void **out,
+			   uint16_t id, uint16_t *version,
+			   const char desc[10], uint8_t *data,
+			   uint16_t data_len, void **out,
 			   unsigned long *out_len);
 
 uint32_t

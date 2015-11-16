@@ -128,7 +128,8 @@ platform_data_probe(void *pdata_buf, unsigned long *pdata_buf_len)
 		err = bs_post_get(&bs, (void **)&pdata_entry,
 				  sizeof(*pdata_entry));
 		if (is_err_status(err)) {
-			err(T("Invalid length of entry %ld\n"), nr_pdata_entry);
+			err(T("Invalid length of entry %ld\n"),
+			    nr_pdata_entry);
 			return CLN_FW_ERR_INVALID_PDATA;
 		}
 
@@ -378,8 +379,9 @@ platform_data_create_entry(uint16_t id, uint16_t version, const char desc[10],
 err_status_t
 platform_data_update_entry(void *pdata_entry_buf,
 			   unsigned long pdata_entry_buf_len,
-			   uint16_t id, uint16_t *version, const char desc[10],
-			   uint8_t *data, uint16_t data_len, void **out,
+			   uint16_t id, uint16_t *version,
+			   const char desc[10], uint8_t *data,
+			   uint16_t data_len, void **out,
 			   unsigned long *out_len)
 {
 	platform_data_entry_t *pdata_entry;
