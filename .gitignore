@@ -1,0 +1,7 @@
+*.o
+*.so.*
+*.a
+cln_fwtool
+cln_fwtool_s
+*.bin
+*.sh
