@@ -34,8 +34,7 @@
 /* Refer to 330234-002US for the details */
 
 #define PLATFORM_DATA_OFFSET			(-0xF0000)
-#define BLOCK_SIZE				0x1000
-#define PLATFORM_DATA_MAX_SIZE			BLOCK_SIZE
+#define PLATFORM_DATA_MAX_SIZE			0x20000
 
 #pragma pack(1)
 
