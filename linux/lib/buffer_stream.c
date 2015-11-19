@@ -127,6 +127,12 @@ bs_reserve_at(buffer_stream_t *bs, unsigned long ext_len, long offset)
 	return bs_seek_at(bs, offset);
 }
 
+err_status_t
+bs_reserve(buffer_stream_t *bs, unsigned long ext_len)
+{
+	return bs_reserve_at(bs, ext_len, bs->current);
+}
+
 static err_status_t
 __bs_get_at(buffer_stream_t *bs, void **in, unsigned long in_len,
 	    int post, long offset)

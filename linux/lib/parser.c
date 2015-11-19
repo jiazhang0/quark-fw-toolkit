@@ -31,6 +31,7 @@
 #include <cln_fw.h>
 #include "internal.h"
 #include "platform_data.h"
+#include "capsule.h"
 #include "buffer_stream.h"
 
 err_status_t
@@ -283,4 +284,53 @@ cln_fw_parser_flush(cln_fw_parser_t *parser, void *fw_buf,
 	}
 
 	return CLN_FW_ERR_NONE;
+}
+
+err_status_t
+cln_fw_parser_generate_capsule(cln_fw_parser_t *parser, void **out,
+			       unsigned long *out_len)
+{
+	buffer_stream_t *fw = &parser->firmware;
+	buffer_stream_t cap;
+	void *cap_header, *update_entry;
+	unsigned long cap_header_len, update_entry_len, payload_len, cap_len;
+	err_status_t err;
+
+	err = capsule_create_header(bs_size(fw), &cap_header,
+				    &cap_header_len);
+	if (is_err_status(err))
+		return err;
+
+	err = capsule_create_update_entry(0xFF800000, bs_size(fw),
+					  &update_entry, &update_entry_len);
+	if (is_err_status(err))
+		goto err_create_update_entry;
+
+	bs_init(&cap, NULL, 0);
+
+	payload_len = (bs_size(fw) + (BLOCK_SIZE - 1)) & ~(BLOCK_SIZE - 1);
+	cap_len = cap_header_len + update_entry_len + payload_len;
+	err = bs_reserve(&cap, cap_len);
+	if (is_err_status(err)) {
+		err(T("Failed to reserve the memory for capsule\n"));
+		goto err_reserve;
+	}
+
+	bs_post_put(&cap, cap_header, cap_header_len);
+	bs_post_put(&cap, update_entry, update_entry_len);
+	bs_post_put(&cap, bs_head(fw), bs_size(fw));
+
+	if (out)
+		*out = bs_head(&cap);
+
+	if (out_len)
+		*out_len = bs_size(&cap);
+
+err_reserve:
+	eee_mfree(update_entry);
+
+err_create_update_entry:
+	eee_mfree(cap_header);
+
+	return err;
 }

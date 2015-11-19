@@ -73,6 +73,10 @@ err_status_t
 cln_fw_parser_flush(cln_fw_parser_t *parser, void *fw_buf,
 		    unsigned long fw_buf_len);
 
+err_status_t
+cln_fw_parser_generate_capsule(cln_fw_parser_t *parser, void **out,
+			       unsigned long *out_len);
+
 /* MFH functions */
 
 unsigned long
@@ -150,5 +154,15 @@ platform_data_update_entry(void *pdata_entry_buf,
 
 uint32_t
 crc32(uint8_t *buf, uint32_t size);
+
+/* Capsule functions */
+
+err_status_t
+capsule_create_header(unsigned long payload_len, void **out,
+		      unsigned long *out_len);
+
+err_status_t
+capsule_create_update_entry(uint32_t addr, uint32_t size,
+			    void **out, unsigned long *out_len);
 
 #endif	/* __INTERNAL_H__ */

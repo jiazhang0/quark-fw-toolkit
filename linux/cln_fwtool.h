@@ -43,6 +43,7 @@ typedef struct {
 
 extern cln_fwtool_command_t command_sbembed;
 extern cln_fwtool_command_t command_show;
+extern cln_fwtool_command_t command_capsule;
 
 int
 cln_fwtool_add_command(cln_fwtool_command_t *cmd);

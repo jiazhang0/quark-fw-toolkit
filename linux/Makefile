@@ -2,7 +2,8 @@ TARGETS = cln_fwtool cln_fwtool_s
 OBJS_cln_fwtool = \
 	cln_fwtool_main.o \
 	cmd_sbembed.o \
-	cmd_show.o
+	cmd_show.o \
+	cmd_capsule.o
 OBJS = $(OBJS_cln_fwtool)
 
 INC_TARGETS = include/cln_fw.h \

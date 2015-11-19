@@ -4,6 +4,7 @@ OBJS_libclnfw = \
 	parser.o \
 	mfh.o \
 	platform_data.o \
+	capsule.o \
 	crc32.o \
 	buffer_stream.o \
 	linux.o \

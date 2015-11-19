@@ -88,6 +88,9 @@ err_status_t
 bs_reserve_at(buffer_stream_t *bs, unsigned long ext_len, long offset);
 
 err_status_t
+bs_reserve(buffer_stream_t *bs, unsigned long ext_len);
+
+err_status_t
 bs_shrink_at(buffer_stream_t *bs, unsigned long len, long offset);
 
 err_status_t

@@ -71,6 +71,7 @@ show_usage(const tchar_t *prog)
 	info_cont(T("  show: Display the details of firmware\n"));
 	info_cont(T("  sbembed: Embed the keys for UEFI Secure Boot ")
 		  T("enablement\n"));
+	info_cont(T("  capsule: Generate capsule image\n"));
 	info_cont(T("\nfile:\n"));
 	info_cont(T("  Input file to be parsed\n"));
 	info_cont(T("\nargs:\n"));
@@ -217,6 +218,7 @@ main(int argc, tchar_t *argv[])
 
 	cln_fwtool_add_command(&command_sbembed);
 	cln_fwtool_add_command(&command_show);
+	cln_fwtool_add_command(&command_capsule);
 
 	ret = parse_options(argc, argv);
 	if (ret)
