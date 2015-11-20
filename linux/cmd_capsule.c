@@ -1,5 +1,5 @@
 /*
- * Firmware show command
+ * Capsule generation command
  *
  * Copyright (c) 2015, Lans Zhang <jia.zhang@windriver.com>
  * All rights reserved.
@@ -33,25 +33,39 @@
 
 #define DEF_OUTPUT_NAME			T("output_unsigned.cap")
 
+static char *opt_input_file;
 static char *opt_output_file = DEF_OUTPUT_NAME;
 static int opt_bios_only;
 
 static void
-show_usage(void)
+show_usage(tchar_t *prog)
 {
-	info_cont(T("\t--output-file, -o: (optional) The output file name ")
-		  T("to override the default name \"%s\"\n"),
-		  DEF_OUTPUT_NAME);
-	info_cont(T("\t--bios-only, -o: (optional) By default, the entire ")
-		  T("input firmware image is wrapped with capsule header. ")
-		  T("This option enables the generated capsule contains ")
-		  T("the BIOS part in firmware image only\n"));
+	info_cont(T("\nusage: %s capsule <file> <args>\n"), prog);
+	info_cont(T("Generate the capsule image\n"));
+	info_cont(T("\nfile:\n"));
+	info_cont(T("  Input firmware to be parsed\n"));
+	info_cont(T("\nargs:\n"));
+	info_cont(T("\n  --output-file, -o\n")
+		  T("    (optional) The output file name to override the ")
+		  T("default name \"%s\"\n"), DEF_OUTPUT_NAME);
+	info_cont(T("\n  --bios-only, -b\n")
+		  T("    (optional) enables the generated capsule contains ")
+		  T("the BIOS part in firmware image only.\n")
+		  T("    By default, the entire input firmware image is ")
+		  T("wrapped with capsule header\n"));
 }
 
 static int
 parse_arg(int opt, char *optarg)
 {
 	switch (opt) {
+	case 1:
+		if (access(optarg, R_OK)) {
+			err(T("Invalid input file specified\n"));
+			return -1;
+		}
+		opt_input_file = optarg;
+		break;
 	case 'o':
 		opt_output_file = optarg;
 		break;
@@ -66,14 +80,17 @@ parse_arg(int opt, char *optarg)
 }
 
 static int
-run_capsule(const char *file_path)
+run_capsule(tchar_t *prog)
 {
 	void *fw, *out;
 	unsigned long fw_len, out_len;
 	err_status_t err;
 	int ret;
 
-	ret = load_file(file_path, (uint8_t **)&fw, &fw_len);
+	if (!opt_input_file)
+		die("No input file specified\n");
+
+	ret = load_file(opt_input_file, (uint8_t **)&fw, &fw_len);
 	if (ret)
 		return ret;
 
@@ -99,16 +116,14 @@ run_capsule(const char *file_path)
 }
 
 static struct option long_opts[] = {
-	{ T("help"), no_argument, NULL, T('h') },
 	{ T("output"), required_argument, NULL, T('o') },
-	{ T("bios-only"), no_argument, NULL, T('o') },
+	{ T("bios-only"), no_argument, NULL, T('b') },
 	{ 0 },	/* NULL terminated */
 };
 
 cln_fwtool_command_t command_capsule = {
 	.name = T("capsule"),
-	.optstring = T("ho:b"),
-	.no_required_arg = 1,
+	.optstring = T("-o:b"),
 	.long_opts = long_opts,
 	.parse_arg = parse_arg,
 	.show_usage = show_usage,

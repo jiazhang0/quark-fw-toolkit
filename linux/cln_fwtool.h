@@ -34,18 +34,21 @@
 typedef struct {
 	const tchar_t *name;
 	const char *optstring;
-	int no_required_arg;
 	const struct option *long_opts;
 	int (*parse_arg)(int opt, char *optarg);
-	void (*show_usage)(void);
-	int (*run)(const char *file_path);
+	void (*show_usage)(tchar_t *prog);
+	int (*run)(tchar_t *prog);
 } cln_fwtool_command_t;
 
+extern cln_fwtool_command_t command_help;
 extern cln_fwtool_command_t command_sbembed;
 extern cln_fwtool_command_t command_show;
 extern cln_fwtool_command_t command_capsule;
 
 int
 cln_fwtool_add_command(cln_fwtool_command_t *cmd);
+
+cln_fwtool_command_t *
+cln_fwtool_find_command(char *command);
 
 #endif	/* __CLN_FWTOOL_H__ */

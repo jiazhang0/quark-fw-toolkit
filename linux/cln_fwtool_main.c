@@ -34,7 +34,6 @@
 #define CLN_FWTOOL_MAX_COMMANDS			16
 
 static int opt_quiet;
-static char *opt_input_file;
 static cln_fwtool_command_t *curr_command;
 static unsigned int cln_fwtool_nr_command;
 static cln_fwtool_command_t *cln_fwtool_commands[CLN_FWTOOL_MAX_COMMANDS];
@@ -43,7 +42,7 @@ static void
 show_banner(void)
 {
 	info_cont(T("\nFirmware Tool for Intel Clanton SoC ")
-		  T("Intel Quark X1000 series)\n"));
+		  T("(Intel Quark SoC X1000 series)\n"));
 	info_cont(T("Copyright (c) 2015, ")
 		  T("Lans Zhang <jia.zhang@windriver.com>\n"));
 	info_cont(T("Version: %s\n\n"), T(VERSION));
@@ -93,11 +92,9 @@ cln_fwtool_add_command(cln_fwtool_command_t *cmd)
 	return 0;
 }
 
-static int
-parse_command(char *command, int argc, tchar_t *argv[])
+cln_fwtool_command_t *
+cln_fwtool_find_command(char *command)
 {
-	cln_fwtool_command_t *cmd;
-	int cmd_required_arg_parsed;
 	unsigned int i;
 
 	for (i = 0; i < cln_fwtool_nr_command; ++i) {
@@ -105,10 +102,26 @@ parse_command(char *command, int argc, tchar_t *argv[])
 			break;
 	}
 	if (i == cln_fwtool_nr_command)
-		return -1;
+		return NULL;
 
-	cmd = cln_fwtool_commands[i];
-	cmd_required_arg_parsed = 0;
+	return cln_fwtool_commands[i];
+}
+
+static int
+parse_command(char *prog, char *command, int argc, tchar_t *argv[])
+{
+	cln_fwtool_command_t *cmd;
+	int cmd_arg_parsed;
+
+	dbg(T("Input command: %s\n"), command);
+
+	cmd = cln_fwtool_find_command(command);
+	if (!cmd) {
+		err(T("Unrecognized command: %s\n"), command);
+		return -1;
+	}
+
+	cmd_arg_parsed = 0;
 
 	while (1) {
 		int opt;
@@ -120,37 +133,33 @@ parse_command(char *command, int argc, tchar_t *argv[])
 
 		switch (opt) {
 		case T('?'):
-		case T('h'):
-			info_cont(T("\narguments:\n"));
-			cmd->show_usage();
-			exit(EXIT_SUCCESS);
-		case 1:
-			if (opt_input_file) {
-				err(T("Duplicated input file specified.\n"));
+			err(T("Unrecongnized argument\n"));
+			return -1;
+		default:	/* Command arguments */
+			cmd_arg_parsed = 1;
+			if (cmd->parse_arg(opt, optarg)) {
+				if (eee_strcmp(command, T("help")))
+					cmd->show_usage(prog);
 				return -1;
 			}
-			if (access(optarg, R_OK)) {
-				err(T("Invalid input file specified.\n"));
-				return -1;
-			}
-			opt_input_file = optarg;
-			break;
-		default:
-			cmd_required_arg_parsed = 1;
-			if (cmd->parse_arg(opt, optarg))
-				return -1;
 		}
 	}
 
-	if (!opt_input_file)
-		die("No input file specified\n");
-
-	if (!cmd_required_arg_parsed && !cmd->no_required_arg) {
-		cmd->show_usage();
-		exit(EXIT_SUCCESS);
+	if (!cmd_arg_parsed) {
+		err(T("Nothing specified"));
+		if (eee_strcmp(cmd->name, T("help")))
+			err(T(". Run \"%s help %s \" for the help info\n"),
+			    prog, command);
+		else
+			err_cont(T("\n"));
+		return -1;
 	}
 
 	curr_command = cmd;
+	if (!curr_command) {
+		show_usage(argv[0]);
+		exit(EXIT_SUCCESS);
+	}
 
 	return 0;
 }
@@ -176,6 +185,8 @@ parse_options(int argc, tchar_t *argv[])
 
 		switch (opt) {
 		case T('?'):
+			err(T("Unrecognized option\n"));
+			return -1;
 		case T('h'):
 			show_usage(argv[0]);
 			exit(EXIT_SUCCESS);
@@ -191,21 +202,13 @@ parse_options(int argc, tchar_t *argv[])
 		case 1:
 			index = optind;
 			optind = 1;
-			if (parse_command(optarg, argc - index + 1,
-					  argv + index - 1)) {
-				err(T("Unrecognized command %s.\n"), optarg);
-				show_usage(argv[0]);
+			if (parse_command(argv[0], optarg, argc - index + 1,
+					  argv + index - 1)) 
 				exit(EXIT_FAILURE);
-			}
 			return 0;
 		default:
 			return -1;
 		}
-	}
-
-	if (!curr_command) {
-		show_usage(argv[0]);
-		exit(EXIT_SUCCESS);
 	}
 
 	return 0;
@@ -216,6 +219,7 @@ main(int argc, tchar_t *argv[])
 {
 	int ret;
 
+	cln_fwtool_add_command(&command_help);
 	cln_fwtool_add_command(&command_sbembed);
 	cln_fwtool_add_command(&command_show);
 	cln_fwtool_add_command(&command_capsule);
@@ -227,5 +231,5 @@ main(int argc, tchar_t *argv[])
 	if (!opt_quiet)
 		show_banner();
 
-	return curr_command->run(opt_input_file);
+	return curr_command->run(argv[0]);
 }

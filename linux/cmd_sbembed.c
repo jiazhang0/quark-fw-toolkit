@@ -1,5 +1,5 @@
 /*
- * UEFI Secure Boot enrollment command
+ * UEFI Secure Boot embed command
  *
  * Copyright (c) 2015, Lans Zhang <jia.zhang@windriver.com>
  * All rights reserved.
@@ -33,52 +33,69 @@
 
 #define DEF_OUTPUT_NAME			T("output.bin")
 
+static char *opt_input_file;
 static char *opt_pk_file, *opt_kek_file, *opt_db_file, *opt_dbx_file;
 static char *opt_output_file = DEF_OUTPUT_NAME;
 
 static void
-show_usage(void)
+show_usage(tchar_t *prog)
 {
-	info_cont(T("\t--output-file, -o: (optional) The output file name ")
-		  T("to override the default name \"%s\"\n"),
-		  DEF_OUTPUT_NAME);
-	info_cont(T("\t--pk, -p: Specify DER formatted PK file\n"));
-	info_cont(T("\t--kek, -k: Specify DER formatted KEK file\n"));
-	info_cont(T("\t--db, -d: Specify DER formatted DB file\n"));
-	info_cont(T("\t--dbx, -dbx: Specify DER formatted DBX file\n"));
+	info_cont(T("\nusage: %s sbembed <file> <args>\n"), prog);
+	info_cont(T("Embed the keys for the enablement of UEFI Secure Boot\n"));
+	info_cont(T("\nfile:\n"));
+	info_cont(T("  Input firmware to be parsed\n"));
+	info_cont(T("\nargs:\n"));
+	info_cont(T("  --output-file, -o\n")
+		  T("    (optional) The output file name to override the ")
+		  T("default name \"%s\"\n"), DEF_OUTPUT_NAME);
+	info_cont(T("\n  --pk, -p\n")
+		  T("    (optional) Specify DER formatted PK file\n"));
+	info_cont(T("\n  --kek, -k\n")
+		  T("    (optional) Specify DER formatted KEK file\n"));
+	info_cont(T("\n  --db, -d\n")
+		  T("    (optional) Specify DER formatted DB file\n"));
+	info_cont(T("\n  --dbx, -x\n")
+		  T("    (optional) Specify DER formatted DBX file\n"));
 }
 
 static int
 parse_arg(int opt, char *optarg)
 {
 	switch (opt) {
+	case 1:
+		if (access(optarg, R_OK)) {
+			err(T("Invalid input file specified\n"));
+			return -1;
+		}
+		opt_input_file = optarg;
+		break;
 	case 'o':
 		opt_output_file = optarg;
 		break;
 	case 'p':
 		if (access(optarg, R_OK)) {
-			err(T("Invalid PK file specified.\n"));
+			err(T("Invalid PK file specified\n"));
 			return -1;
 		}
 		opt_pk_file = optarg;
 		break;
 	case 'k':
 		if (access(optarg, R_OK)) {
-			err(T("Invalid KEK file specified.\n"));
+			err(T("Invalid KEK file specified\n"));
 			return -1;
 		}
 		opt_kek_file = optarg;
 		break;
 	case 'd':
 		if (access(optarg, R_OK)) {
-			err(T("Invalid DB file specified.\n"));
+			err(T("Invalid DB file specified\n"));
 			return -1;
 		}
 		opt_db_file = optarg;
 		break;
 	case 'x':
 		if (access(optarg, R_OK)) {
-			err(T("Invalid DBX file specified.\n"));
+			err(T("Invalid DBX file specified\n"));
 			return -1;
 		}
 		opt_dbx_file = optarg;
@@ -87,23 +104,26 @@ parse_arg(int opt, char *optarg)
 		return -1;
 	}
 
-	if (!opt_pk_file && !opt_kek_file && !opt_db_file && !opt_dbx_file) {
-		err(T("Neither PK, KEK, DB or DBX specified.\n"));
-		return -1;
-	}
-
 	return 0;
 }
 
 static int
-run_sbembed(const char *file_path)
+run_sbembed(tchar_t *prog)
 {
 	uint8_t *fw, *pk, *kek, *db, *dbx, *out;
 	unsigned long fw_len, pk_len, kek_len, db_len, dbx_len, out_len;
 	err_status_t err;
 	int ret;
 
-	ret = load_file(file_path, &fw, &fw_len);
+	if (!opt_input_file)
+		die("No input file specified\n");
+
+	if (!opt_pk_file && !opt_kek_file && !opt_db_file && !opt_dbx_file) {
+		err(T("Neither PK, KEK, DB and DBX specified\n"));
+		return -1;
+	}
+
+	ret = load_file(opt_input_file, &fw, &fw_len);
 	if (ret)
 		return ret;
 
@@ -186,7 +206,7 @@ static struct option long_opts[] = {
 
 cln_fwtool_command_t command_sbembed = {
 	.name = T("sbembed"),
-	.optstring = T("o:p:k:d:x:"),
+	.optstring = T("-o:p:k:d:x:"),
 	.long_opts = long_opts,
 	.parse_arg = parse_arg,
 	.show_usage = show_usage,

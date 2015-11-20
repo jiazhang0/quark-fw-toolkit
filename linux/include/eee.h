@@ -77,6 +77,9 @@ typedef unsigned int		bool;
 #define err(fmt, ...) \
 	fprintf(stderr, T("ERROR: ") fmt, ##__VA_ARGS__)
 
+#define err_cont(fmt, ...) \
+	fprintf(stdout, fmt, ##__VA_ARGS__)
+
 int
 load_file(const char *file_path, uint8_t **out, unsigned long *out_len);
 

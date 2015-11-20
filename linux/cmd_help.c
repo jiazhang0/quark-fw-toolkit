@@ -1,5 +1,5 @@
 /*
- * Firmware show command
+ * Help command
  *
  * Copyright (c) 2015, Lans Zhang <jia.zhang@windriver.com>
  * All rights reserved.
@@ -31,15 +31,12 @@
 #include <err_status.h>
 #include "cln_fwtool.h"
 
-static char *opt_input_file;
+static char *opt_command;
 
 static void
 show_usage(tchar_t *prog)
 {
-	info_cont(T("\nusage: %s show <file>\n"), prog);
-	info_cont(T("Display the details of a firmware image\n"));
-	info_cont(T("\nfile:\n"));
-	info_cont(T("  Input firmware to be parsed\n"));
+	info_cont(T("\nNobody can help you this time :(\n"));
 }
 
 static int
@@ -47,11 +44,17 @@ parse_arg(int opt, char *optarg)
 {
 	switch (opt) {
 	case 1:
-		if (access(optarg, R_OK)) {
-			err(T("Invalid input file specified\n"));
-			return -1;
+		{
+			cln_fwtool_command_t *cmd;
+
+			cmd = cln_fwtool_find_command(optarg);
+			if (!cmd) {
+				err(T("Unrecognized command argument ")
+				    T("\"%s\" specified\n"), optarg);
+				return -1;
+			}
+			opt_command = optarg;
 		}
-		opt_input_file = optarg;
 		break;
 	default:
 		return -1;
@@ -61,38 +64,22 @@ parse_arg(int opt, char *optarg)
 }
 
 static int
-run_show(tchar_t *prog)
+run_help(tchar_t *prog)
 {
-	void *fw;
-	unsigned long fw_len;
-	err_status_t err;
-	int ret;
+	cln_fwtool_find_command(opt_command)->show_usage(prog);
 
-	if (!opt_input_file)
-		die("No input file specified\n");
-
-	ret = load_file(opt_input_file, (uint8_t **)&fw, &fw_len);
-	if (ret)
-		return ret;
-
-	err = cln_fw_util_show_firmware(fw, fw_len);
-	if (is_err_status(err))
-		ret = -1;
-
-	free(fw);
-
-	return ret;
+	return 0;
 }
 
 static struct option long_opts[] = {
 	{ 0 },	/* NULL terminated */
 };
 
-cln_fwtool_command_t command_show = {
-	.name = T("show"),
+cln_fwtool_command_t command_help = {
+	.name = T("help"),
 	.optstring = T("-"),
 	.long_opts = long_opts,
 	.parse_arg = parse_arg,
 	.show_usage = show_usage,
-	.run = run_show,
+	.run = run_help,
 };

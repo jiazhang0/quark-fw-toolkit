@@ -1,6 +1,7 @@
 TARGETS = cln_fwtool cln_fwtool_s
 OBJS_cln_fwtool = \
 	cln_fwtool_main.o \
+	cmd_help.o \
 	cmd_sbembed.o \
 	cmd_show.o \
 	cmd_capsule.o
