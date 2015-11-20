@@ -54,6 +54,7 @@ capsule_create_header(unsigned long payload_len, void **out,
 	payload_len = (payload_len + (BLOCK_SIZE - 1)) & ~(BLOCK_SIZE - 1);
 	cap_header->image_size = sizeof(*cap_header) + update_entry_len
 				 + payload_len;
+	eee_memset(cap_header->reserved, 0xff, sizeof(cap_header->reserved));
 
 	if (out)
 		*out = cap_header;
@@ -80,8 +81,12 @@ capsule_create_update_entry(uint32_t addr, uint32_t payload_len,
 	update_entry->size = (payload_len + (BLOCK_SIZE - 1))
 			     & ~(BLOCK_SIZE - 1);
 	update_entry->offset = sizeof(capsule_header_t) + update_entry_len;
+	update_entry->reserved = 0xffffffff;
+
 	/* NULL update entry terminated */
 	eee_memset(update_entry + 1, 0, sizeof(*update_entry));
+	eee_memset(update_entry + 2, 0xff,
+		   update_entry_len - sizeof(*update_entry) * 2);
 
 	if (out)
 		*out = update_entry;
