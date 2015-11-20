@@ -225,7 +225,8 @@ err_der2kek:
 
 err_status_t
 cln_fw_util_generate_capsule(void *fw, unsigned long fw_len,
-			     void **out, unsigned long *out_len)
+			     int bios_only, void **out,
+			     unsigned long *out_len)
 {
 	cln_fw_handle_t handle;
 	err_status_t err;
@@ -238,7 +239,7 @@ cln_fw_util_generate_capsule(void *fw, unsigned long fw_len,
 	if (is_err_status(err))
 		return err;
 
-	err = cln_fw_handle_generate_capsule(handle, out, out_len);
+	err = cln_fw_handle_generate_capsule(handle, bios_only, out, out_len);
 	cln_fw_handle_close(handle);
 
 	if (is_err_status(err))

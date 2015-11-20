@@ -74,8 +74,8 @@ cln_fw_parser_flush(cln_fw_parser_t *parser, void *fw_buf,
 		    unsigned long fw_buf_len);
 
 err_status_t
-cln_fw_parser_generate_capsule(cln_fw_parser_t *parser, void **out,
-			       unsigned long *out_len);
+cln_fw_parser_generate_capsule(cln_fw_parser_t *parser, int bios_only,
+			       void **out, unsigned long *out_len);
 
 /* MFH functions */
 

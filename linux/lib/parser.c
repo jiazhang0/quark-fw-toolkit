@@ -287,28 +287,45 @@ cln_fw_parser_flush(cln_fw_parser_t *parser, void *fw_buf,
 }
 
 err_status_t
-cln_fw_parser_generate_capsule(cln_fw_parser_t *parser, void **out,
-			       unsigned long *out_len)
+cln_fw_parser_generate_capsule(cln_fw_parser_t *parser, int bios_only,
+			       void **out, unsigned long *out_len)
 {
 	buffer_stream_t *fw = &parser->firmware;
 	buffer_stream_t cap;
 	void *cap_header, *update_entry;
 	unsigned long cap_header_len, update_entry_len, payload_len, cap_len;
+	uint32_t addr;
 	err_status_t err;
 
-	err = capsule_create_header(bs_size(fw), &cap_header,
+	if (!bios_only) {
+		addr = 0xFF800000;
+		payload_len = bs_size(fw);
+		if (payload_len != FIRMWARE_SIZE) {
+			err(T("The firmware size is expected length\n"));
+			return CLN_FW_ERR_INVALID_PARAMETER;
+		}
+	} else {
+		addr = 0xFFD00000;
+		if (bs_size(fw) < BIOS_REGION_SIZE) {
+			err(T("The BIOS part in firmware is not big enough\n"));
+			return CLN_FW_ERR_INVALID_PARAMETER;
+		}
+		payload_len = BIOS_REGION_SIZE;
+	}
+
+	payload_len = (payload_len + (BLOCK_SIZE - 1)) & ~(BLOCK_SIZE - 1);
+	err = capsule_create_header(payload_len, &cap_header,
 				    &cap_header_len);
 	if (is_err_status(err))
 		return err;
 
-	err = capsule_create_update_entry(0xFF800000, bs_size(fw),
+	err = capsule_create_update_entry(addr, payload_len,
 					  &update_entry, &update_entry_len);
 	if (is_err_status(err))
 		goto err_create_update_entry;
 
 	bs_init(&cap, NULL, 0);
 
-	payload_len = (bs_size(fw) + (BLOCK_SIZE - 1)) & ~(BLOCK_SIZE - 1);
 	cap_len = cap_header_len + update_entry_len + payload_len;
 	err = bs_reserve(&cap, cap_len);
 	if (is_err_status(err)) {
@@ -318,7 +335,7 @@ cln_fw_parser_generate_capsule(cln_fw_parser_t *parser, void **out,
 
 	bs_post_put(&cap, cap_header, cap_header_len);
 	bs_post_put(&cap, update_entry, update_entry_len);
-	bs_post_put(&cap, bs_head(fw), bs_size(fw));
+	bs_put(&cap, bs_head(fw) + bs_size(fw) - payload_len, payload_len);
 
 	if (out)
 		*out = bs_head(&cap);

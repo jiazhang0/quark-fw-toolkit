@@ -34,6 +34,7 @@
 #define DEF_OUTPUT_NAME			T("output_unsigned.cap")
 
 static char *opt_output_file = DEF_OUTPUT_NAME;
+static int opt_bios_only;
 
 static void
 show_usage(void)
@@ -41,6 +42,10 @@ show_usage(void)
 	info_cont(T("\t--output-file, -o: (optional) The output file name ")
 		  T("to override the default name \"%s\"\n"),
 		  DEF_OUTPUT_NAME);
+	info_cont(T("\t--bios-only, -o: (optional) By default, the entire ")
+		  T("input firmware image is wrapped with capsule header. ")
+		  T("This option enables the generated capsule contains ")
+		  T("the BIOS part in firmware image only\n"));
 }
 
 static int
@@ -49,6 +54,9 @@ parse_arg(int opt, char *optarg)
 	switch (opt) {
 	case 'o':
 		opt_output_file = optarg;
+		break;
+	case 'b':
+		opt_bios_only = 1;
 		break;
 	default:
 		return -1;
@@ -69,7 +77,8 @@ run_capsule(const char *file_path)
 	if (ret)
 		return ret;
 
-	err = cln_fw_util_generate_capsule(fw, fw_len, &out, &out_len);
+	err = cln_fw_util_generate_capsule(fw, fw_len, opt_bios_only,
+					   &out, &out_len);
 	if (is_err_status(err))
 		ret = -1;
 
@@ -92,12 +101,13 @@ run_capsule(const char *file_path)
 static struct option long_opts[] = {
 	{ T("help"), no_argument, NULL, T('h') },
 	{ T("output"), required_argument, NULL, T('o') },
+	{ T("bios-only"), no_argument, NULL, T('o') },
 	{ 0 },	/* NULL terminated */
 };
 
 cln_fwtool_command_t command_capsule = {
 	.name = T("capsule"),
-	.optstring = T("ho:"),
+	.optstring = T("ho:b"),
 	.no_required_arg = 1,
 	.long_opts = long_opts,
 	.parse_arg = parse_arg,

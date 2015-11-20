@@ -35,6 +35,9 @@
 	"\xe4\xd1\x00\xd4\x14\xa3\x2b\x44\x89\xed\xa9\x2e\x4c\x81\x97\xcb"
 #define CAPSULE_GUID_SIZE			16
 
+#define BIOS_REGION_SIZE			0x300000
+#define FIRMWARE_SIZE				0x800000
+
 #define BLOCK_SIZE				4096
 
 #define CAPSULE_FL_UPDATE_MAC			0x00001

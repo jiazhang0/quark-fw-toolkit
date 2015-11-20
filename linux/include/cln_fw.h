@@ -74,8 +74,8 @@ cln_fw_handle_flush(cln_fw_handle_t handle, void **out,
 		    unsigned long *out_len);
 
 err_status_t
-cln_fw_handle_generate_capsule(cln_fw_handle_t handle, void **out,
-			       unsigned long *out_len);
+cln_fw_handle_generate_capsule(cln_fw_handle_t handle, int bios_only,
+			       void **out, unsigned long *out_len);
 
 /* Utility routines */
 
@@ -92,7 +92,8 @@ cln_fw_util_embed_sb_keys(void *fw, unsigned long fw_len,
 
 err_status_t
 cln_fw_util_generate_capsule(void *fw, unsigned long fw_len,
-			     void **out, unsigned long *out_len);
+			     int bios_only, void **out,
+			     unsigned long *out_len);
 
 int
 cln_fw_verbose(void);

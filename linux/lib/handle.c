@@ -169,8 +169,8 @@ cln_fw_handle_flush(cln_fw_handle_t handle, void **out,
 }
 
 err_status_t
-cln_fw_handle_generate_capsule(cln_fw_handle_t handle, void **out,
-			       unsigned long *out_len)
+cln_fw_handle_generate_capsule(cln_fw_handle_t handle, int bios_only,
+			       void **out, unsigned long *out_len)
 {
 	cln_fw_parser_t *parser;
 	err_status_t err;
@@ -179,7 +179,7 @@ cln_fw_handle_generate_capsule(cln_fw_handle_t handle, void **out,
 		return CLN_FW_ERR_INVALID_PARAMETER;
 
 	parser = (cln_fw_parser_t *)handle;
-	err = cln_fw_parser_generate_capsule(parser, out, out_len);
+	err = cln_fw_parser_generate_capsule(parser, bios_only, out, out_len);
 	if (is_err_status(err))
 		return err;
 
