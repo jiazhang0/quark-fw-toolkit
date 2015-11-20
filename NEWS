@@ -1,11 +1,19 @@
+Version 0.1.2
+=============
+Released: 2015-11-20
+
+help: implement help command
+capsule: add --bios-only option
+
 Version 0.1.1
 =============
 Released: 2015-11-19
 
-Support the generation of firmware upgrade capsule.
+capsule: support the generation of firmware upgrade capsule
+platform_data: fix the max allowed region size
 
 Version 0.1.0
 =============
 Released: 2015-11-16
 
-Initial implementation providing cln_fwtool and libclnfw.so.
+Initial implementation providing cln_fwtool and libclnfw.so

@@ -17,6 +17,11 @@ Installation
 $ sudo make install
 $ sudo ldconfig
 
+Help
+----
+
+$ cln_fwtool -h
+
 Clanton Support
 ---------------
 
