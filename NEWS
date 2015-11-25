@@ -1,3 +1,11 @@
+Version 0.1.3
+=============
+Released: 2015-11-25
+
+Change copyright info
+Makefile cleanup
+capsule: fill the reserved region with 0xff
+
 Version 0.1.2
 =============
 Released: 2015-11-20
