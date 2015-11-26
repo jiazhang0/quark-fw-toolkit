@@ -1,8 +1,8 @@
 quark-fw-toolkit
 ================
 
-This project provides tool and library to easily dump, operate and modify
-firmware used on Intel Quark processor family.
+This project provides tools and library to easily dump, modify and generate
+firmware image used on Intel Quark processor family.
 
 Build
 -----
@@ -26,8 +26,8 @@ Clanton Support
 ---------------
 
 Intel Clanton SoC is the codename of the first generation of Intel Quark
-processor family. It is also unknown as Quark X1000 series.
+processor family. It is also unknown as Intel Quark SoC X1000 series.
 
-cln_fwtool is the dedicated tool to support the flash image file used for
-Clanton SoC. Also, you can embed the PK, KEK and/or DB to a flash image to
-enable UEFI secure boot with the keys you own.
+cln_fwtool is the dedicated tool to support the firmware image used for
+Clanton SoC. Also, you can embed the PK, KEK and/or DB to a firmware image
+to enable UEFI secure boot with the keys you own.
