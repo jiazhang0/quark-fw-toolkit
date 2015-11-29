@@ -33,15 +33,23 @@ typedef struct {
 
 #define MAX_PLATFORM_ID				0xFFFFU
 
-#define PDATA_ID_UNDEF				0
+#define PDATA_ID_INVALID			0
 #define PDATA_ID_PLATFORM_ID			1
 #define PDATA_ID_SERIAL_NUMBER			2
 #define PDATA_ID_1ST_MAC			3
 #define PDATA_ID_2ND_MAC			4
+#define PDATA_ID_MEM_CFG			5
 #define PDATA_ID_MRC				6
 #define PDATA_ID_PK				7
-#define PDATA_ID_CERT				8	/* KEK, DB */
+/* SecureBoot records to be provisioned into 'kek', 'db' or 'dbx' variable. */
+#define PDATA_ID_SB_RECORD			8
 #define PDATA_ID_MAX				9
+
+/* All Intel defined item identifiers must have a UINT16 value
+ * less than PDAT_ITEM_ID_INTEL_MAX. */
+#define PDAT_ID_INTEL_MAX			0x0fff
+
+
 /* Custom IDs */
 #define CAP_DATA_ID_PAYLOAD			0xFFF0
 
@@ -55,7 +63,7 @@ typedef struct {
 	uint16_t version;
 	/* Variable data determined by id */
 	uint8_t data[0];
-} platform_data_entry_t;
+} platform_data_item_t;
 
 #define PDATA_KEK_CERT_HEADER			0x00000001U
 #define PDATA_DB_CERT_HEADER			0x00010002U

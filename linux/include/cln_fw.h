@@ -34,7 +34,7 @@ typedef enum {
 #define CLN_FW_ERR_INVALID_PDATA		CLN_FW_ERR(3)
 #define CLN_FW_ERR_OUT_OF_MEM			CLN_FW_ERR(4)
 #define CLN_FW_ERR_NO_PDATA			CLN_FW_ERR(5)
-#define CLN_FW_ERR_PDATA_ENTRY_NOT_FOUND	CLN_FW_ERR(6)
+#define CLN_FW_ERR_PDATA_ITEM_NOT_FOUND		CLN_FW_ERR(6)
 
 /* Handle routines */
 

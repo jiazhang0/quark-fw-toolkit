@@ -24,7 +24,7 @@
 typedef struct {
 	bcll_t link;
 	buffer_stream_t bs;
-} cln_fw_pdata_entry_t;
+} cln_fw_pdata_item_t;
 
 typedef struct {
 	buffer_stream_t firmware;
@@ -32,9 +32,9 @@ typedef struct {
 	buffer_stream_t pdata;
 	/* For output */
 	buffer_stream_t pdata_header;
-	void *pdata_entry;
-	bcll_t pdata_entry_list;
-	unsigned long nr_pdata_entry;
+	void *pdata_item;
+	bcll_t pdata_item_list;
+	unsigned long nr_pdata_item;
 } cln_fw_parser_t;
 
 err_status_t
@@ -88,20 +88,20 @@ unsigned long
 platform_data_size(void *pdata_buf);
 
 unsigned long
-platform_data_all_entry_size(void *pdata_buf);
+platform_data_all_item_size(void *pdata_buf);
 
 unsigned long
-platform_data_entry_size(void *pdata_entry_buf);
+platform_data_item_size(void *pdata_item_buf);
 
 uint16_t
-platform_data_entry_id(void *pdata_entry_buf);
+platform_data_item_id(void *pdata_item_buf);
 
 void
-platform_data_update_header(void *pdata, void *pdata_entry,
-			    unsigned long pdata_entry_len);
+platform_data_update_header(void *pdata, void *pdata_item,
+			    unsigned long pdata_item_len);
 
 uint32_t
-platform_data_cert_header(void *pdata_entry_buf);
+platform_data_cert_header(void *pdata_item_buf);
 
 err_status_t
 platform_data_probe(void *pdata_buf, unsigned long *pdata_buf_len);
@@ -114,25 +114,25 @@ platform_data_show(void *pdata_buf, unsigned long pdata_buf_len);
 
 err_status_t
 platform_data_parse(void *pdata_buf, unsigned long pdata_buf_len,
-		    void **out_pdata_header_buf, void **out_pdata_entry_buf,
-		    unsigned long *out_nr_pdata_entry);
+		    void **out_pdata_header_buf, void **out_pdata_item_buf,
+		    unsigned long *out_nr_pdata_item);
 
 err_status_t
-platform_data_search_entry(void *pdata_buf, unsigned long pdata_buf_len,
-			   uint16_t id);
+platform_data_search_item(void *pdata_buf, unsigned long pdata_buf_len,
+			  uint16_t id);
 
 err_status_t
-platform_data_create_entry(uint16_t id, uint16_t version, const char desc[10],
-			   uint8_t *data, uint16_t data_len, void **out,
-			   unsigned long *out_len);
+platform_data_create_item(uint16_t id, uint16_t version, const char desc[10],
+			  uint8_t *data, uint16_t data_len, void **out,
+			  unsigned long *out_len);
 
 err_status_t
-platform_data_update_entry(void *pdata_entry_buf,
-			   unsigned long pdata_entry_buf_len,
-			   uint16_t id, uint16_t *version,
-			   const char desc[10], uint8_t *data,
-			   uint16_t data_len, void **out,
-			   unsigned long *out_len);
+platform_data_update_item(void *pdata_item_buf,
+			  unsigned long pdata_item_buf_len,
+			  uint16_t id, uint16_t *version,
+			  const char desc[10], uint8_t *data,
+			  uint16_t data_len, void **out,
+			  unsigned long *out_len);
 
 uint32_t
 crc32(uint8_t *buf, uint32_t size);

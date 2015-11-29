@@ -34,7 +34,7 @@ cln_fw_parser_create(void *fw, unsigned long fw_len,
 	bs_init(&parser->mfh, NULL, 0);
 	bs_init(&parser->pdata, NULL, 0);
 	bs_init(&parser->pdata_header, NULL, 0);
-	bcll_init(&parser->pdata_entry_list);
+	bcll_init(&parser->pdata_item_list);
 
 	*out = parser;
 
@@ -42,14 +42,14 @@ cln_fw_parser_create(void *fw, unsigned long fw_len,
 }
 
 static void
-free_all_cln_fw_pdata_entry(cln_fw_parser_t *parser)
+free_all_cln_fw_pdata_item(cln_fw_parser_t *parser)
 {
-	cln_fw_pdata_entry_t *entry, *tmp;
+	cln_fw_pdata_item_t *item, *tmp;
 
-	bcll_for_each_link_safe(entry, tmp, &parser->pdata_entry_list, link) {
-		bcll_del(&entry->link);
-		eee_mfree(entry);
-		--parser->nr_pdata_entry;
+	bcll_for_each_link_safe(item, tmp, &parser->pdata_item_list, link) {
+		bcll_del(&item->link);
+		eee_mfree(item);
+		--parser->nr_pdata_item;
 	}
 }
 
@@ -59,10 +59,10 @@ cln_fw_parser_destroy(cln_fw_parser_t *parser)
 	if (!parser)
 		return;
 
-	free_all_cln_fw_pdata_entry(parser);
+	free_all_cln_fw_pdata_item(parser);
 
-	if (parser->pdata_entry)
-		eee_mfree(parser->pdata_entry);
+	if (parser->pdata_item)
+		eee_mfree(parser->pdata_item);
 
 	if (bs_head(&parser->pdata_header))
 		eee_mfree(bs_head(&parser->pdata_header));
@@ -71,18 +71,18 @@ cln_fw_parser_destroy(cln_fw_parser_t *parser)
 }
 
 static err_status_t
-add_cln_fw_pdata_entry(cln_fw_parser_t *parser, void *pdata_entry_buf)
+add_cln_fw_pdata_item(cln_fw_parser_t *parser, void *pdata_item_buf)
 {
-	cln_fw_pdata_entry_t *entry;
+	cln_fw_pdata_item_t *item;
 
-	entry = eee_malloc(sizeof(*entry));
-	if (!entry)
+	item = eee_malloc(sizeof(*item));
+	if (!item)
 		return CLN_FW_ERR_OUT_OF_MEM;
 
-	bs_init(&entry->bs, pdata_entry_buf,
-		platform_data_entry_size(pdata_entry_buf));
-	bcll_add_tail(&parser->pdata_entry_list, &entry->link);
-	++parser->nr_pdata_entry;
+	bs_init(&item->bs, pdata_item_buf,
+		platform_data_item_size(pdata_item_buf));
+	bcll_add_tail(&parser->pdata_item_list, &item->link);
+	++parser->nr_pdata_item;
 
 	return CLN_FW_ERR_NONE;
 }
@@ -117,28 +117,28 @@ cln_fw_parser_parse(cln_fw_parser_t *parser)
 
 	err = platform_data_probe(pdata, &pdata_len);
 	if (!is_err_status(err) && bs_empty(&parser->pdata)) {
-		void *pdata_header_buf, *pdata_entry_buf, *p;
-		unsigned long i, nr_pdata_entry;
+		void *pdata_header_buf, *pdata_item_buf, *p;
+		unsigned long i, nr_pdata_item;
 
 		err = platform_data_parse(pdata, pdata_len,
 					  &pdata_header_buf,
-					  &pdata_entry_buf,
-					  &nr_pdata_entry);
+					  &pdata_item_buf,
+					  &nr_pdata_item);
 		if (is_err_status(err))
 			return err;
 
-		p = pdata_entry_buf;
-		for (i = 0; i < nr_pdata_entry; ++i) {
-			err = add_cln_fw_pdata_entry(parser, p);
+		p = pdata_item_buf;
+		for (i = 0; i < nr_pdata_item; ++i) {
+			err = add_cln_fw_pdata_item(parser, p);
 			if (is_err_status(err)) {
-				free_all_cln_fw_pdata_entry(parser);
+				free_all_cln_fw_pdata_item(parser);
 				return err;
 			}
-			p += platform_data_entry_size(p);
+			p += platform_data_item_size(p);
 		}
 
-		parser->pdata_entry = pdata_entry_buf;
-		parser->nr_pdata_entry = nr_pdata_entry;
+		parser->pdata_item = pdata_item_buf;
+		parser->nr_pdata_item = nr_pdata_item;
 		bs_init(&parser->pdata_header, pdata_header_buf,
 			platform_data_header_size());
 
@@ -154,35 +154,35 @@ cln_fw_parser_embed_key(cln_fw_parser_t *parser, cln_fw_sb_key_t key,
 {
 	buffer_stream_t *pdata;
 	uint16_t id;
-	void *pdata_entry;
-	unsigned long pdata_entry_len;
+	void *pdata_item;
+	unsigned long pdata_item_len;
 	err_status_t err;
 
 	if (key == CLN_FW_SB_KEY_PK)
 		id = PDATA_ID_PK;
 	else
-		id = PDATA_ID_CERT;
+		id = PDATA_ID_SB_RECORD;
 
 	pdata = &parser->pdata;
-	err = platform_data_search_entry(bs_head(pdata), bs_size(pdata), id);
+	err = platform_data_search_item(bs_head(pdata), bs_size(pdata), id);
 	if (!is_err_status(err)) {
-		cln_fw_pdata_entry_t *entry, *tmp;
+		cln_fw_pdata_item_t *item, *tmp;
 
-		dbg(T("Updating platform entry ID %d ...\n"), id);
-		bcll_for_each_link_safe(entry, tmp,
-				&parser->pdata_entry_list, link) {
-			uint16_t pdata_entry_id;
+		dbg(T("Updating platform item ID %d ...\n"), id);
+		bcll_for_each_link_safe(item, tmp,
+				&parser->pdata_item_list, link) {
+			uint16_t pdata_item_id;
 			uint32_t header;
-			void *pdata_entry = bs_head(&entry->bs);
+			void *pdata_item = bs_head(&item->bs);
 
-			pdata_entry_id = platform_data_entry_id(pdata_entry);
-			if (pdata_entry_id != id)
+			pdata_item_id = platform_data_item_id(pdata_item);
+			if (pdata_item_id != id)
 				continue;
 
 			if (key == CLN_FW_SB_KEY_PK)
 				break;
 
-			header = platform_data_cert_header(pdata_entry);
+			header = platform_data_cert_header(pdata_item);
 			if (header == PDATA_KEK_CERT_HEADER
 					&& key == CLN_FW_SB_KEY_KEK)
 				break;
@@ -190,19 +190,19 @@ cln_fw_parser_embed_key(cln_fw_parser_t *parser, cln_fw_sb_key_t key,
 					&& key == CLN_FW_SB_KEY_DB)
 				break;
 		}
-		if (&entry->link == &parser->pdata_entry_list)
-			return CLN_FW_ERR_PDATA_ENTRY_NOT_FOUND;
+		if (&item->link == &parser->pdata_item_list)
+			return CLN_FW_ERR_PDATA_ITEM_NOT_FOUND;
 
-		err = platform_data_update_entry(bs_head(&entry->bs),
-						 bs_size(&entry->bs), id,
+		err = platform_data_update_item(bs_head(&item->bs),
+						 bs_size(&item->bs), id,
 						 NULL, NULL, in, in_len,
-						 &pdata_entry,
-						 &pdata_entry_len);
+						 &pdata_item,
+						 &pdata_item_len);
 		if (is_err_status(err))
 			return err;
 
-		bs_init(&entry->bs, pdata_entry, pdata_entry_len);
-	} else if (err == CLN_FW_ERR_PDATA_ENTRY_NOT_FOUND) {
+		bs_init(&item->bs, pdata_item, pdata_item_len);
+	} else if (err == CLN_FW_ERR_PDATA_ITEM_NOT_FOUND) {
 		const char desc[][10] = {
 			"pk",
 			"kek cert",
@@ -210,15 +210,15 @@ cln_fw_parser_embed_key(cln_fw_parser_t *parser, cln_fw_sb_key_t key,
 			"dbx cert",
 		};
 
-		err = platform_data_create_entry(id, 0, desc[key], in, in_len,
-						 &pdata_entry,
-						 &pdata_entry_len);
+		err = platform_data_create_item(id, 0, desc[key], in, in_len,
+						 &pdata_item,
+						 &pdata_item_len);
 		if (is_err_status(err))
 			return err;
 
-		err = add_cln_fw_pdata_entry(parser, pdata_entry);
+		err = add_cln_fw_pdata_item(parser, pdata_item);
 		if (is_err_status(err)) {
-			eee_mfree(pdata_entry);
+			eee_mfree(pdata_item);
 			return err;
 		}
 	}
@@ -231,9 +231,9 @@ cln_fw_parser_flush(cln_fw_parser_t *parser, void *fw_buf,
 		    unsigned long fw_buf_len)
 {
 	buffer_stream_t fw;
-	cln_fw_pdata_entry_t *entry;
-	void *pdata, *pdata_entry;
-	unsigned long total_entry_len;
+	cln_fw_pdata_item_t *item;
+	void *pdata, *pdata_item;
+	unsigned long total_item_len;
 	err_status_t err;
 
 	bs_init(&fw, fw_buf, fw_buf_len);
@@ -247,15 +247,15 @@ cln_fw_parser_flush(cln_fw_parser_t *parser, void *fw_buf,
 	}
 
 	bs_seek(&fw, platform_data_header_size());
-	bs_get(&fw, (void **)&pdata_entry, 0);
+	bs_get(&fw, (void **)&pdata_item, 0);
 
-	total_entry_len = 0;
-	bcll_for_each_link(entry, &parser->pdata_entry_list, link) {
-		bs_post_put(&fw, bs_head(&entry->bs), bs_size(&entry->bs));
-		total_entry_len += bs_size(&entry->bs);
+	total_item_len = 0;
+	bcll_for_each_link(item, &parser->pdata_item_list, link) {
+		bs_post_put(&fw, bs_head(&item->bs), bs_size(&item->bs));
+		total_item_len += bs_size(&item->bs);
 	}
 
-	platform_data_update_header(pdata, pdata_entry, total_entry_len);
+	platform_data_update_header(pdata, pdata_item, total_item_len);
 
 	bs_put_at(&fw, pdata, platform_data_header_size(),
 		  platform_data_offset());
@@ -274,8 +274,8 @@ cln_fw_parser_generate_capsule(cln_fw_parser_t *parser, int bios_only,
 {
 	buffer_stream_t *fw = &parser->firmware;
 	buffer_stream_t cap;
-	void *cap_header, *update_entry;
-	unsigned long cap_header_len, update_entry_len, payload_len, cap_len;
+	void *cap_header, *update_item;
+	unsigned long cap_header_len, update_item_len, payload_len, cap_len;
 	uint32_t addr;
 	err_status_t err;
 
@@ -302,13 +302,13 @@ cln_fw_parser_generate_capsule(cln_fw_parser_t *parser, int bios_only,
 		return err;
 
 	err = capsule_create_update_entry(addr, payload_len,
-					  &update_entry, &update_entry_len);
+					  &update_item, &update_item_len);
 	if (is_err_status(err))
-		goto err_create_update_entry;
+		goto err_create_update_item;
 
 	bs_init(&cap, NULL, 0);
 
-	cap_len = cap_header_len + update_entry_len + payload_len;
+	cap_len = cap_header_len + update_item_len + payload_len;
 	err = bs_reserve(&cap, cap_len);
 	if (is_err_status(err)) {
 		err(T("Failed to reserve the memory for capsule\n"));
@@ -316,7 +316,7 @@ cln_fw_parser_generate_capsule(cln_fw_parser_t *parser, int bios_only,
 	}
 
 	bs_post_put(&cap, cap_header, cap_header_len);
-	bs_post_put(&cap, update_entry, update_entry_len);
+	bs_post_put(&cap, update_item, update_item_len);
 	bs_put(&cap, bs_head(fw) + bs_size(fw) - payload_len, payload_len);
 
 	if (out)
@@ -326,9 +326,9 @@ cln_fw_parser_generate_capsule(cln_fw_parser_t *parser, int bios_only,
 		*out_len = bs_size(&cap);
 
 err_reserve:
-	eee_mfree(update_entry);
+	eee_mfree(update_item);
 
-err_create_update_entry:
+err_create_update_item:
 	eee_mfree(cap_header);
 
 	return err;
