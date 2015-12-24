@@ -1,5 +1,5 @@
 /*
- * Linux-specific helpers
+ * Linux-specific helper functions
  *
  * Copyright (c) 2015 Wind River Systems, Inc.
  *
@@ -61,31 +61,29 @@ typedef unsigned int		bool;
 
 int
 load_file(const char *file_path, uint8_t **out, unsigned long *out_len);
-
 int
 save_output_file(const char *file_path, uint8_t *buf, unsigned long size);
 
+size_t
+eee_strlen(const char *s);
+char *
+eee_strcpy(char *dest, const char *src);
+char *
+eee_strncpy(char *dest, const char *src, size_t n);
 int
 eee_strcmp(const char *s1, const char *s2);
-
 int
 eee_memcmp(const void *s1, const void *s2, unsigned long n);
-
 void *
 eee_memcpy(void *dst, const void *src, unsigned long size);
-
 void *
 eee_memset(void *s, int c, unsigned long n);
-
 void *
 eee_malloc(unsigned long size);
-
 void *
 eee_mrealloc(void *buf, unsigned long size, unsigned long new_size);
-
 void *
 eee_mrealloc_aligned(void *buf, unsigned long size, unsigned long *new_size);
-
 void
 eee_mfree(void *buf);
 

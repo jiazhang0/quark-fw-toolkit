@@ -89,6 +89,24 @@ save_output_file(const char *file_path, uint8_t *buf, unsigned long size)
 	return 0;
 }
 
+size_t
+eee_strlen(const char *s)
+{
+	return strlen(s);
+}
+
+char *
+eee_strcpy(char *dest, const char *src)
+{
+	return strcpy(dest, src);
+}
+
+char *
+eee_strncpy(char *dest, const char *src, size_t n)
+{
+	return strncpy(dest, src, n);
+}
+
 int
 eee_strcmp(const char *s1, const char *s2)
 {
