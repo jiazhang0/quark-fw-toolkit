@@ -40,7 +40,7 @@ show_version(void)
 static void
 show_usage(const tchar_t *prog)
 {
-	info_cont(T("\nusage: %s <options> <command> <file> [<args>]\n"),
+	info_cont(T("usage: %s <options> <command> <file> [<args>]\n"),
 		  prog);
 	info_cont(T("\noptions:\n"));
 	info_cont(T("  --help, -h: Print this help information\n"));
@@ -54,6 +54,7 @@ show_usage(const tchar_t *prog)
 	info_cont(T("  sbembed: Embed the keys for UEFI Secure Boot ")
 		  T("enablement\n"));
 	info_cont(T("  capsule: Generate capsule image\n"));
+	info_cont(T("  diagnosis: Give the diagosis information\n"));
 	info_cont(T("\nfile:\n"));
 	info_cont(T("  Input file to be parsed\n"));
 	info_cont(T("\nargs:\n"));
@@ -206,6 +207,7 @@ main(int argc, tchar_t *argv[])
 	cln_fwtool_add_command(&command_sbembed);
 	cln_fwtool_add_command(&command_show);
 	cln_fwtool_add_command(&command_capsule);
+	cln_fwtool_add_command(&command_diagnosis);
 
 	ret = parse_options(argc, argv);
 	if (ret)
@@ -213,6 +215,11 @@ main(int argc, tchar_t *argv[])
 
 	if (!opt_quiet)
 		show_banner();
+
+	if (!curr_command) {
+		show_usage(argv[0]);
+		exit(EXIT_SUCCESS);
+	}
 
 	return curr_command->run(argv[0]);
 }

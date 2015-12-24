@@ -35,6 +35,7 @@ typedef enum {
 #define CLN_FW_ERR_OUT_OF_MEM			CLN_FW_ERR(4)
 #define CLN_FW_ERR_NO_PDATA			CLN_FW_ERR(5)
 #define CLN_FW_ERR_PDATA_ITEM_NOT_FOUND		CLN_FW_ERR(6)
+#define CLN_FW_ERR_MFH_FLASH_ITEM_NOT_FOUND	CLN_FW_ERR(7)
 
 /* Handle routines */
 
@@ -58,6 +59,10 @@ cln_fw_handle_flush(cln_fw_handle_t handle, void **out,
 err_status_t
 cln_fw_handle_generate_capsule(cln_fw_handle_t handle, int bios_only,
 			       void **out, unsigned long *out_len);
+
+err_status_t
+cln_fw_handle_diagnose_firmware(cln_fw_handle_t handle, void *in,
+				unsigned long in_len);
 
 /* Utility routines */
 

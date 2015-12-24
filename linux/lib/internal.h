@@ -12,13 +12,17 @@
 #define __INTERNAL_H__
 
 #include <eee.h>
+#include <err_status.h>
 #include "buffer_stream.h"
 #include "bcll.h"
+#include "mfh.h"
+
+#define stringify(x)		#x
 
 #define offsetof(type, member)	((unsigned long)&((type *)0)->member)
 
-#define container_of(ptr, type, member) ({	\
-	const typeof(((type *)0)->member) *__ptr = (ptr);	\
+#define container_of(ptr, type, member)	({	\
+	const __typeof__(((type *)0)->member) *__ptr = (ptr);	\
 	(type *)((char *)__ptr - offsetof(type, member));})
 
 typedef struct {
@@ -59,19 +63,21 @@ err_status_t
 cln_fw_parser_generate_capsule(cln_fw_parser_t *parser, int bios_only,
 			       void **out, unsigned long *out_len);
 
+err_status_t
+cln_fw_parser_diagnose_firmware(cln_fw_parser_t *parser);
+
 /* MFH functions */
 
 unsigned long
 mfh_header_size(void);
-
 long
 mfh_offset(void);
-
 err_status_t
 mfh_probe(void *mfh_buf, unsigned long *mfh_buf_len);
-
 err_status_t
 mfh_show(void *mfh_buf, unsigned long mfh_buf_len);
+err_status_t
+mfh_show_fw_version(void *mfh_buf, unsigned long mfh_buf_len);
 
 /* Platform Data functions */
 

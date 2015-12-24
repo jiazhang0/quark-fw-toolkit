@@ -1,5 +1,5 @@
 /*
- * Master Flash Header (MFH) Data Structure
+ * Master Flash Header (MFH) infrastructure API
  *
  * Copyright (c) 2015 Wind River Systems, Inc.
  *
@@ -12,26 +12,6 @@
 #define __MFH_H__
 
 #include <eee.h>
-
-/* Refer to 330234-002US for the details */
-
-#define MFH_OFFSET			(-0xF8000)
-
-#pragma pack(1)
-
-#define MFH_IDENTIFIER			0x5F4D4648U
-#define MFH_VERSION			1
-#define MFH_MAX_FLASH_ITEMS		240
-#define MFH_MAX_BOOT_ITEMS		24
-
-typedef struct {
-	uint32_t Identifier;
-	uint32_t Version;
-	uint32_t Flags;
-	uint32_t NextHeaderBlock;
-	uint32_t FlashItemCount;
-	uint32_t BootPriorityListCount;
-} mfh_header_t;
 
 typedef enum {
 	host_fw_stage1 = 0x00000000,
@@ -60,15 +40,24 @@ typedef enum {
 	reserved_0x00000017,
 	mfh_build_information,
 	mfh_version,
+	mfh_flash_item_type_max
 } mfh_flash_item_type_t;
 
-typedef struct {
-	mfh_flash_item_type_t Type;
-	uint32_t FlashItemAddress;
-	uint32_t FlashItemLength;
-	uint32_t Reserved;
-} mfh_flash_item_t;
+typedef struct __mfh_context		mfh_context_t;
 
-#pragma pack()
+struct __mfh_context {
+	err_status_t (*probe)(mfh_context_t *ctx, void *buf,
+			      unsigned long buf_len);
+	void (*destroy)(mfh_context_t *ctx);
+	err_status_t (*find_item)(mfh_context_t *ctx,
+				  mfh_flash_item_type_t type,
+				  void **out, unsigned long *out_len);
+	err_status_t (*firmware_version)(mfh_context_t *ctx,
+					 uint32_t *version);
+	void *priv;
+};
+
+err_status_t
+mfh_context_new(mfh_context_t **ctx);
 
 #endif	/* __MFH_H__ */

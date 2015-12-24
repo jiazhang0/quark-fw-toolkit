@@ -30,4 +30,6 @@ processor family. It is also unknown as Intel Quark SoC X1000 series.
 
 cln_fwtool is the dedicated tool to support the firmware image used for
 Clanton SoC. Also, you can embed the PK, KEK and/or DB to a firmware image
-to enable UEFI secure boot with the keys you own.
+to enable UEFI secure boot with the keys you own. Furthermore, cln_fwtool
+can provide the diagnosis information as a guideline according to the
+content of the firmware.

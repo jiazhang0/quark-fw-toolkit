@@ -333,3 +333,167 @@ err_create_update_item:
 
 	return err;
 }
+
+#define MFH_FLASH_ITEM_SIGNED_BOOTLOADER		(1 << 0)
+#define MFH_FLASH_ITEM_SIGNED_BOOTLOADER_CONF		(1 << 1)
+#define MFH_FLASH_ITEM_SIGNED_KERNEL			(1 << 2)
+#define MFH_FLASH_ITEM_SIGNED_RAMDISK			(1 << 3)
+#define MFH_FLASH_ITEM_FW_VERSION			(1 << 4)
+
+#define PDATA_ITEM_SERIAL_NUMBER			(1 << 0)
+#define PDATA_ITEM_1ST_MAC				(1 << 1)
+#define PDATA_ITEM_2ND_MAC				(1 << 2)
+#define PDATA_ITEM_PK					(1 << 3)
+#define PDATA_ITEM_SB_RECORD				(1 << 4)
+
+err_status_t
+cln_fw_parser_diagnose_firmware(cln_fw_parser_t *parser)
+{
+	mfh_context_t *mfh_ctx;
+	buffer_stream_t *fw = &parser->firmware;
+	void *mfh, *pdata;
+	unsigned long mfh_len, pdata_len;
+	err_status_t err;
+	int mfh_status, pdata_status;
+	uint32_t fw_version;
+
+	err = bs_get_at(fw, &mfh, mfh_header_size(), mfh_offset());
+	if (is_err_status(err)) {
+		err(T("The length of firmware is not expected for ")
+		    T("searching MFH\n"));
+		return err;
+	}
+
+	err = mfh_context_new(&mfh_ctx);
+	if (is_err_status(err))
+		return err;
+
+	mfh_status = 0;
+	mfh_len = bs_remain(fw);
+	err = mfh_ctx->probe(mfh_ctx, mfh, mfh_len);
+	if (is_err_status(err)) {
+		mfh_status = -1;
+		goto show_mfh_status;
+	}
+
+	/*
+	 * TODO: check whether using the key module signed with the
+	 * open stage 1 private key.
+	 */
+	err = mfh_ctx->find_item(mfh_ctx, mfh_bootloader_signed, NULL, NULL);
+	if (!is_err_status(err))
+		mfh_status |= MFH_FLASH_ITEM_SIGNED_BOOTLOADER;
+
+	err = mfh_ctx->find_item(mfh_ctx, mfh_bootloader_conf_signed, NULL, NULL);
+	if (!is_err_status(err))
+		mfh_status |= MFH_FLASH_ITEM_SIGNED_BOOTLOADER_CONF;
+
+	err = mfh_ctx->find_item(mfh_ctx, mfh_kernel_signed, NULL, NULL);
+	if (!is_err_status(err))
+		mfh_status |= MFH_FLASH_ITEM_SIGNED_KERNEL;
+
+	err = mfh_ctx->find_item(mfh_ctx, mfh_ramdisk_signed, NULL, NULL);
+	if (!is_err_status(err))
+		mfh_status |= MFH_FLASH_ITEM_SIGNED_RAMDISK;
+
+	err = mfh_ctx->firmware_version(mfh_ctx, &fw_version);
+	if (!is_err_status(err))
+		mfh_status |= MFH_FLASH_ITEM_FW_VERSION;
+
+	/* TODO: Check the key module signed with the stage 1 key
+	 * for X1020/X1021.
+	 */
+
+show_mfh_status:
+	info_cont(T("MFH Symptoms:\n"));
+	if (mfh_status == -1)
+		info_cont(T("- Not detected\n"));
+	else {
+		if (mfh_status & MFH_FLASH_ITEM_SIGNED_BOOTLOADER)
+			info_cont(T("- Signed bootloader detected\n"));
+		if (mfh_status & MFH_FLASH_ITEM_SIGNED_BOOTLOADER_CONF)
+			info_cont(T("- Signed configuration of bootloader ")
+				  T("detected\n"));
+		if (mfh_status & MFH_FLASH_ITEM_SIGNED_KERNEL)
+			info_cont(T("- Signed kernel detected\n"));
+		if (mfh_status & MFH_FLASH_ITEM_SIGNED_RAMDISK)
+			info_cont(T("- Signed ramdisk detected\n"));
+		if (mfh_status & MFH_FLASH_ITEM_SIGNED_RAMDISK)
+			info_cont(T("- Signed ramdisk detected\n"));
+
+		info_cont(T("Diagnosis result:\n"));
+		if (mfh_status & (MFH_FLASH_ITEM_SIGNED_BOOTLOADER
+				| MFH_FLASH_ITEM_SIGNED_BOOTLOADER_CONF
+				| MFH_FLASH_ITEM_SIGNED_KERNEL
+				| MFH_FLASH_ITEM_SIGNED_RAMDISK))
+			info_cont(T("- You may be unable to replace above ")
+				  T("components with yours if you don't own ")
+				  T("the stage 1 private key\n"));
+		else
+			info_cont(T("- N/A\n"));
+	}
+
+	pdata_len = platform_data_max_size();
+	err = bs_get_at(fw, &pdata, pdata_len, platform_data_offset());
+	if (is_err_status(err)) {
+		err(T("The length of firmware is not expected for ")
+		    T("searching platform data\n"));
+		return err;
+	}
+
+	pdata_status = 0;
+
+	err = platform_data_probe(pdata, &pdata_len);
+	if (is_err_status(err)) {
+		pdata_status = -1;
+		goto show_pdata_status;
+	}
+
+	err = platform_data_search_item(pdata, pdata_len,
+					PDATA_ID_SERIAL_NUMBER);
+	if (!is_err_status(err))
+		pdata_status |= PDATA_ITEM_SERIAL_NUMBER;
+	err = platform_data_search_item(pdata, pdata_len, PDATA_ID_1ST_MAC);
+	if (!is_err_status(err))
+		pdata_status |= PDATA_ITEM_1ST_MAC;
+	err = platform_data_search_item(pdata, pdata_len, PDATA_ID_2ND_MAC);
+	if (!is_err_status(err))
+		pdata_status |= PDATA_ITEM_2ND_MAC;
+	err = platform_data_search_item(pdata, pdata_len, PDATA_ID_PK);
+	if (!is_err_status(err))
+		pdata_status |= PDATA_ITEM_PK;
+	err = platform_data_search_item(pdata, pdata_len, PDATA_ID_SB_RECORD);
+	if (!is_err_status(err))
+		pdata_status |= PDATA_ITEM_SB_RECORD;
+
+show_pdata_status:
+	info_cont(T("\nPlatform Data Symptoms:\n"));
+	if (pdata_status == -1) {
+		info_cont(T("- Not detected\n"));
+		return CLN_FW_ERR_NONE;
+	}
+
+	if (pdata_status & PDATA_ITEM_SERIAL_NUMBER)
+		info_cont(T("- Board serial number detected\n"));
+	if (pdata_status & PDATA_ITEM_1ST_MAC)
+		info_cont(T("- MAC 0 detected\n"));
+	if (pdata_status & PDATA_ITEM_2ND_MAC)
+		info_cont(T("- MAC 1 detected\n"));
+	if (pdata_status & PDATA_ITEM_PK)
+		info_cont(T("- PK detected\n"));
+	if (pdata_status & PDATA_ITEM_SB_RECORD)
+		info_cont(T("- KEK/DB detected\n"));
+
+	info_cont(T("Diagnosis result:\n"));
+	if (fw_version <= 0x010100ff &&
+			(pdata_status & (PDATA_ITEM_SERIAL_NUMBER |
+				PDATA_ITEM_1ST_MAC | PDATA_ITEM_2ND_MAC))) {
+		info_cont(T("- You need to run %d-step process of ")
+			  T("r1.2 firmware upgrade to preserve the ")
+			  T("contents of above asset\n"),
+			  pdata_status & PDATA_ITEM_SERIAL_NUMBER ? 2 : 1);
+	} else
+		info_cont(T("N/A\n"));
+
+	return CLN_FW_ERR_NONE;
+}

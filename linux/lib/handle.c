@@ -58,8 +58,12 @@ cln_fw_handle_show_all(cln_fw_handle_t handle)
 
 	parser = (cln_fw_parser_t *)handle;
 	bs = &parser->mfh;
-	if (!bs_empty(bs))
+	if (!bs_empty(bs)) {
+		mfh_show_fw_version(bs_head(bs), bs_size(bs));
+		info_cont(T("\n"));
 		mfh_show(bs_head(bs), bs_size(bs));
+		info_cont(T("\n"));
+	}
 
 	bs = &parser->pdata;
 	if (!bs_empty(bs))
@@ -162,6 +166,24 @@ cln_fw_handle_generate_capsule(cln_fw_handle_t handle, int bios_only,
 
 	parser = (cln_fw_parser_t *)handle;
 	err = cln_fw_parser_generate_capsule(parser, bios_only, out, out_len);
+	if (is_err_status(err))
+		return err;
+
+	return CLN_FW_ERR_NONE;
+}
+
+err_status_t
+cln_fw_handle_diagnose_firmware(cln_fw_handle_t handle, void *in,
+				unsigned long in_len)
+{
+	cln_fw_parser_t *parser;
+	err_status_t err;
+
+	if (!handle || !in || !in_len)
+		return CLN_FW_ERR_INVALID_PARAMETER;
+
+	parser = (cln_fw_parser_t *)handle;
+	err = cln_fw_parser_diagnose_firmware(parser);
 	if (is_err_status(err))
 		return err;
 

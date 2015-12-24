@@ -1,6 +1,7 @@
-LIB_TARGETS = libclnfw.so.$(VERSION)
-TARGETS = $(LIB_TARGETS) libclnfw.a
-OBJS_libclnfw = \
+LIB_NAME := libclnfw
+LIB_TARGETS := $(LIB_NAME).so.$(VERSION)
+TARGETS := $(LIB_TARGETS) $(LIB_NAME).a
+OBJS_$(LIB_NAME) = \
 	parser.o \
 	mfh.o \
 	platform_data.o \
@@ -9,12 +10,13 @@ OBJS_libclnfw = \
 	buffer_stream.o \
 	linux.o \
 	util.o \
-	handle.o
-
-OBJS = $(OBJS_libclnfw)
+	handle.o \
+	class.o
+OBJS := $(OBJS_$(LIB_NAME))
 
 CFLAGS += -fpic -DBYTE_STREAM_ERROR_BASE=0x10000 \
-	  -DCLN_FLASH_ERROR_BASE=0x20000
+	  -DCLN_FLASH_ERROR_BASE=0x20000 \
+	  -DCLASS_ERROR_BASE=0x30000
 LDFLAGS += -shared
 
 .DEFAULT_GOAL := all
@@ -23,17 +25,17 @@ LDFLAGS += -shared
 all: $(TARGETS) Makefile
 
 clean:
-	@$(RM) $(OBJS) $(TARGETS) %.so.$(MAJOR_VERSION) %.so.$(MAJOR_VERSION).$(MINOR_VERSION)
+	@$(RM) $(TARGETS) $(OBJS) *.so.*
 
-install:
+install: all
 	$(INSTALL) -d -m 755 $(DESTDIR)$(libdir)
 	$(foreach x, $(LIB_TARGETS), $(INSTALL) -m 755 $(x) $(DESTDIR)$(libdir); \
 		ln -sfn $(x) $(DESTDIR)$(libdir)/$(patsubst %.$(VERSION),%,$(x)); \
 		ln -sfn $(x) $(DESTDIR)$(libdir)/$(patsubst %.$(VERSION),%.$(MAJOR_VERSION),$(x)); \
 		ln -sfn $(x) $(DESTDIR)$(libdir)/$(patsubst %.$(VERSION),%.$(MAJOR_VERSION).$(MINOR_VERSION),$(x));)
 
-libclnfw.so.$(VERSION): $(OBJS_libclnfw)
+$(LIB_NAME).so.$(VERSION): $(OBJS_$(LIB_NAME))
 	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $^ -Wl,-soname,$(patsubst %.$(VERSION),%,$@)
 
-libclnfw.a: $(OBJS_libclnfw)
-	$(AR) rcs $@ $(OBJS_libclnfw)
+$(LIB_NAME).a: $(OBJS_$(LIB_NAME))
+	$(AR) rcs $@ $^
