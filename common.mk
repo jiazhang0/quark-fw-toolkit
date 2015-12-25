@@ -9,9 +9,8 @@ EXTRA_LDFLAGS ?=
 
 LDFLAGS := --warn-common --no-undefined --fatal-warnings \
 	   $(patsubst $(join -Wl,,)%,%,$(EXTRA_LDFLAGS))
-CFLAGS := -O2 -Wall -ggdb -fPIC -DVERSION=\"$(VERSION)\" \
-	  -I$(TOPDIR)/linux/include $(EXTRA_CFLAGS) \
-	  $(addprefix $(join -Wl,,),$(LDFLAGS))
+CFLAGS := -O2 -Wall -ggdb -fPIC -I$(TOPDIR)/linux/include \
+	  $(EXTRA_CFLAGS) $(addprefix $(join -Wl,,),$(LDFLAGS))
 
 DESTDIR ?=
 prefix ?= /usr/local

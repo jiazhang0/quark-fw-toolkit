@@ -34,7 +34,7 @@ OBJS_$(LIB_NAME) := $(addprefix lib/, \
 OBJS := $(OBJS_$(BIN_NAME)) $(OBJS_$(LIB_NAME))
 
 LDFLAGS +=
-CFLAGS +=
+CFLAGS += -DVERSION=\"$(VERSION)\"
 
 .DEFAULT_GOAL := all
 .PHONE: all clean install
