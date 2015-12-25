@@ -50,10 +50,16 @@ run_show(tchar_t *prog)
 	err_status_t err;
 	int ret;
 
-	if (!opt_input_file)
-		die("No input file specified\n");
+	if (!opt_input_file) {
+		if (!cln_fw_util_cpu_is_clanton())
+			die("No input file specified\n");
 
-	ret = load_file(opt_input_file, (uint8_t **)&fw, &fw_len);
+		fw_len = 0x800000;
+		ret = read_phys_mem("/dev/mem", (uint8_t **)&fw, fw_len,
+				    0xFF800000);
+	} else
+		ret = load_file(opt_input_file, (uint8_t **)&fw, &fw_len);
+
 	if (ret)
 		return ret;
 

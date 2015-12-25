@@ -129,8 +129,8 @@ parse_command(char *prog, char *command, int argc, tchar_t *argv[])
 		}
 	}
 
-	if (!cmd_arg_parsed) {
-		err(T("Nothing specified"));
+	if (!cmd_arg_parsed && !cln_fw_util_cpu_is_clanton()) {
+		err(T("Nothing specified\n"));
 		if (eee_strcmp(cmd->name, T("help")))
 			err(T(". Run \"%s help %s \" for the help info\n"),
 			    prog, command);

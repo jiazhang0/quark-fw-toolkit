@@ -12,6 +12,7 @@
 #define EEE_H
 
 #define _GNU_SOURCE
+#define _LARGEFILE64_SOURCE
 
 #include <ctype.h>
 #include <stdlib.h>
@@ -20,6 +21,9 @@
 #include <string.h>
 #include <getopt.h>
 #include <stdint.h>
+#include <fcntl.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 
 #define T(str)			str
 
@@ -59,6 +63,9 @@ typedef unsigned int		bool;
 #define err_cont(fmt, ...) \
 	fprintf(stdout, fmt, ##__VA_ARGS__)
 
+int
+read_phys_mem(const char *file_path, uint8_t **out, unsigned long len,
+	      unsigned long offset);
 int
 load_file(const char *file_path, uint8_t **out, unsigned long *out_len);
 int

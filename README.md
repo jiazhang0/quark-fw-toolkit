@@ -33,3 +33,7 @@ Clanton SoC. Also, you can embed the PK, KEK and/or DB to a firmware image
 to enable UEFI secure boot with the keys you own. Furthermore, cln_fwtool
 can provide the diagnosis information as a guideline according to the
 content of the firmware.
+
+The sub-commands show and diagnosis can work on a real clanton-based board.
+In this case, instead of loading a firmware file, cln_fwtool can detect
+the physical memory region where the flash chip resides on.

@@ -38,37 +38,28 @@ typedef enum {
 #define CLN_FW_ERR_MFH_FLASH_ITEM_NOT_FOUND	CLN_FW_ERR(7)
 
 /* Handle routines */
-
 err_status_t
 cln_fw_handle_open(cln_fw_handle_t *handle, void *fw, unsigned long fw_len);
-
 void
 cln_fw_handle_close(cln_fw_handle_t handle);
-
 void
 cln_fw_handle_show_all(cln_fw_handle_t handle);
-
 err_status_t
 cln_fw_handle_embed_key(cln_fw_handle_t handle, cln_fw_sb_key_t key,
 			void *in, unsigned long in_len);
-
 err_status_t
 cln_fw_handle_flush(cln_fw_handle_t handle, void **out,
 		    unsigned long *out_len);
-
 err_status_t
 cln_fw_handle_generate_capsule(cln_fw_handle_t handle, int bios_only,
 			       void **out, unsigned long *out_len);
-
 err_status_t
 cln_fw_handle_diagnose_firmware(cln_fw_handle_t handle, void *in,
 				unsigned long in_len);
 
 /* Utility routines */
-
 err_status_t
 cln_fw_util_show_firmware(void *fw, unsigned long fw_len);
-
 err_status_t
 cln_fw_util_embed_sb_keys(void *fw, unsigned long fw_len,
 			  void *pk, unsigned long pk_len,
@@ -76,15 +67,14 @@ cln_fw_util_embed_sb_keys(void *fw, unsigned long fw_len,
 			  void *db, unsigned long db_len,
 			  void *dbx, unsigned long dbx_len,
 			  void **out, unsigned long *out_len);
-
 err_status_t
 cln_fw_util_generate_capsule(void *fw, unsigned long fw_len,
 			     int bios_only, void **out,
 			     unsigned long *out_len);
-
+int
+cln_fw_util_cpu_is_clanton(void);
 int
 cln_fw_verbose(void);
-
 void
 cln_fw_set_verbosity(int verbose);
 

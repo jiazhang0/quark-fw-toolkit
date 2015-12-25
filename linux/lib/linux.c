@@ -12,6 +12,55 @@
 #include <cln_fw.h>
 
 int
+read_phys_mem(const char *file_path, uint8_t **out, unsigned long size,
+	      unsigned long offset)
+{
+	int fd;
+	uint8_t *buf;
+	int ret;
+
+	if (!file_path || !out || !size) {
+		err(T("Invalid parameters specified\n"));
+		return -1;
+	}
+
+	dbg(T("Opening file %s @ 0x%lx ...\n"), file_path, offset);
+
+	fd = open(file_path, O_RDONLY | O_LARGEFILE);
+	if (fd < 0) {
+		err(T("Failed to open file %s.\n"), file_path);
+		return -1;
+	}
+
+	if (lseek64(fd, (off64_t)offset, SEEK_SET) != offset) {
+		ret = -1;
+		err(T("Failed to set the offset of the file.\n"));
+		goto err;
+	}
+
+	buf = (uint8_t *)malloc(size);
+	if (!buf) {
+		ret = -1;
+		err(T("Failed to allocate memory for file.\n"));
+		goto err;
+	}
+
+	if (read(fd, buf, size) != size) {
+		ret = -1;
+		err("Failed to read file.\n");
+		free(buf);
+	} else {
+		*out = buf;
+		ret = 0;
+	}
+
+err:
+	close(fd);
+
+	return ret;
+}
+
+int
 load_file(const char *file_path, uint8_t **out, unsigned long *out_len)
 {
 	FILE *fp;
