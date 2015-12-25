@@ -1,3 +1,6 @@
+include $(TOPDIR)/common.mk
+include $(TOPDIR)/version.mk
+
 LIB_NAME := libclnfw
 LIB_TARGETS := $(LIB_NAME).so.$(VERSION)
 TARGETS := $(LIB_TARGETS) $(LIB_NAME).a
@@ -17,7 +20,6 @@ OBJS := $(OBJS_$(LIB_NAME))
 CFLAGS += -fpic -DBYTE_STREAM_ERROR_BASE=0x10000 \
 	  -DCLN_FLASH_ERROR_BASE=0x20000 \
 	  -DCLASS_ERROR_BASE=0x30000
-LDFLAGS += -shared
 
 .DEFAULT_GOAL := all
 .PHONE: all clean install
@@ -35,7 +37,7 @@ install: all
 		ln -sfn $(x) $(DESTDIR)$(libdir)/$(patsubst %.$(VERSION),%.$(MAJOR_VERSION).$(MINOR_VERSION),$(x));)
 
 $(LIB_NAME).so.$(VERSION): $(OBJS_$(LIB_NAME))
-	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $^ -Wl,-soname,$(patsubst %.$(VERSION),%,$@)
+	$(CC) $(CFLAGS) -shared -o $@ $^ -Wl,-soname,$(patsubst %.$(VERSION),%,$@)
 
 $(LIB_NAME).a: $(OBJS_$(LIB_NAME))
 	$(AR) rcs $@ $^

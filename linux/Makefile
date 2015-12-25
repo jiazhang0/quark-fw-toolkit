@@ -1,3 +1,6 @@
+include $(TOPDIR)/common.mk
+include $(TOPDIR)/version.mk
+
 BIN_NAME := cln_fwtool
 BIN_TARGETS := $(BIN_NAME) $(BIN_NAME)_s
 LIB_NAME := libclnfw
@@ -30,13 +33,8 @@ OBJS_$(LIB_NAME) := $(addprefix lib/, \
 		    )
 OBJS := $(OBJS_$(BIN_NAME)) $(OBJS_$(LIB_NAME))
 
-LDFLAGS := --warn-common --no-undefined --fatal-warnings \
-	   $(patsubst $(join -Wl,,)%,%,$(EXTRA_LDFLAGS))
-CFLAGS := -O2 -Wall -ggdb -fPIC -DVERSION=\"$(VERSION)\" \
-	  -I$(TOPDIR)/linux/include $(addprefix $(join -Wl,,),$(LDFLAGS)) \
-	  $(EXTRA_CFLAGS)
-
-export CFLAGS
+LDFLAGS +=
+CFLAGS +=
 
 .DEFAULT_GOAL := all
 .PHONE: all clean install
