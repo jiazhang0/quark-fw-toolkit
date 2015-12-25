@@ -22,6 +22,26 @@ Help
 
 $ cln_fwtool -h
 
+Usage
+-----
+
+- Show the information of firmware (if current machine is quark-based)
+# cln_fwtool show
+
+- Show the diagnosis information of firmware (if current machine is quark-based)
+# cln_fwtool diagnosis
+
+- Show the information of firmware image
+$ cln_fwtool show
+
+- Embed UEFI secure boot keys to a firmware image
+$ cln_fwtool sbembed Flash-crosshill-8M-secure.bin \
+	--pk=owner-cert.cer --kek=vendor-cert.cer --db=vendor-cert.cer
+
+- Convert the firmware image to an unsigned capsule image
+$ cln_fwtool capsule test/Flash-crosshill-8M-secure.bin \
+	-o output_unsigned_8M.cap
+
 Clanton Support
 ---------------
 
