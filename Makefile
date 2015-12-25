@@ -7,6 +7,7 @@ CROSS_COMPILE ?=
 CC := $(CROSS_COMPILE)gcc
 LD := $(CROSS_COMPILE)ld
 AR := $(CROSS_COMPILE)ar
+EXTRA_CFLAGS ?=
 INSTALL ?= install
 
 DESTDIR ?=
@@ -30,4 +31,4 @@ tag:
 
 export VERSION MAJOR_VERSION MINOR_VERSION \
        TOPDIR DESTDIR prefix libdir bindir includedir \
-       CC LD AR INSTALL
+       CC LD AR INSTALL EXTRA_CFLAGS
