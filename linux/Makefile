@@ -30,7 +30,8 @@ OBJS_$(LIB_NAME) := $(addprefix lib/, \
 		    )
 OBJS := $(OBJS_$(BIN_NAME)) $(OBJS_$(LIB_NAME))
 
-LDFLAGS := --warn-common --no-undefined --fatal-warnings
+LDFLAGS := --warn-common --no-undefined --fatal-warnings \
+	   $(patsubst $(join -Wl,,)%,%,$(EXTRA_LDFLAGS))
 CFLAGS := -O2 -Wall -ggdb -fPIC -DVERSION=\"$(VERSION)\" \
 	  -I$(TOPDIR)/linux/include $(addprefix $(join -Wl,,),$(LDFLAGS)) \
 	  $(EXTRA_CFLAGS)
