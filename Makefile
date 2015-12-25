@@ -14,4 +14,4 @@ all clean install:
 	@for x in $(SUBDIRS); do $(MAKE) -C $$x $@; done
 
 tag:
-	@git tag -a $(VERSION) refs/heads/master
+	@git tag -a $(VERSION) -m $(VERSION) refs/heads/master
