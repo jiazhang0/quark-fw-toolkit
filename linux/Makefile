@@ -45,7 +45,7 @@ $(BIN_NAME): $(OBJS_$(BIN_NAME)) lib/$(LIB_NAME).so.$(VERSION)
 	$(CC) $(CFLAGS) $^ -o $@
 
 $(BIN_NAME)_s: $(OBJS_$(BIN_NAME)) lib/$(LIB_NAME).a
-	$(CC) $(CFLAGS) -static $^ -o $@
+	$(CC) $(CFLAGS) -static -Wl,--start-group $^ -Wl,--end-group -o $@
 
 lib/$(LIB_NAME).so.$(VERSION):
 	@$(MAKE) -C lib $(LIB_NAME).so.$(VERSION)
