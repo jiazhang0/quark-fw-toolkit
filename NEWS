@@ -1,3 +1,12 @@
+Version 0.1.5
+=============
+Released: 2015-12-28
+
+Fix build failure due to not found -lc
+Fix build failure for cln_fwtool_s
+Fix printing the software version
+README: add the usages
+
 Version 0.1.4
 =============
 Released: 2015-12-25
