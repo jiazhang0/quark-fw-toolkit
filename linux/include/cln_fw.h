@@ -36,6 +36,7 @@ typedef enum {
 #define CLN_FW_ERR_NO_PDATA			CLN_FW_ERR(5)
 #define CLN_FW_ERR_PDATA_ITEM_NOT_FOUND		CLN_FW_ERR(6)
 #define CLN_FW_ERR_MFH_FLASH_ITEM_NOT_FOUND	CLN_FW_ERR(7)
+#define CLN_FW_ERR_INVALID_CSBH			CLN_FW_ERR(8)
 
 /* Handle routines */
 err_status_t

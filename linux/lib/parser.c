@@ -15,6 +15,12 @@
 #include "platform_data.h"
 #include "capsule.h"
 #include "buffer_stream.h"
+#include "mfh.h"
+#include "skm.h"
+#include "csbh.h"
+
+#define FLASH_SKM_SIZE			0x8000
+#define FLASH_SKM_OFFSET		(-0x28000)
 
 err_status_t
 cln_fw_parser_create(void *fw, unsigned long fw_len,
@@ -32,6 +38,7 @@ cln_fw_parser_create(void *fw, unsigned long fw_len,
 	eee_memset(parser, 0, sizeof(*parser));
 	bs_init(&parser->firmware, fw, fw_len);
 	bs_init(&parser->mfh, NULL, 0);
+	bs_init(&parser->skm, NULL, 0);
 	bs_init(&parser->pdata, NULL, 0);
 	bs_init(&parser->pdata_header, NULL, 0);
 	bcll_init(&parser->pdata_item_list);
@@ -91,7 +98,7 @@ err_status_t
 cln_fw_parser_parse(cln_fw_parser_t *parser)
 {
 	buffer_stream_t *fw = &parser->firmware;
-	void *mfh, *pdata;
+	void *mfh, *pdata, *skm;
 	unsigned long mfh_len, pdata_len;
 	err_status_t err;
 
@@ -144,6 +151,10 @@ cln_fw_parser_parse(cln_fw_parser_t *parser)
 
 		bs_init(&parser->pdata, pdata, pdata_len);
 	}
+
+	err = bs_get_at(fw, &skm, FLASH_SKM_SIZE, FLASH_SKM_OFFSET);
+	if (!is_err_status(err) && bs_empty(&parser->skm))
+		bs_init(&parser->skm, skm, FLASH_SKM_SIZE);
 
 	return CLN_FW_ERR_NONE;
 }
@@ -350,12 +361,50 @@ err_status_t
 cln_fw_parser_diagnose_firmware(cln_fw_parser_t *parser)
 {
 	mfh_context_t *mfh_ctx;
+	skm_context_t *skm_ctx;
 	buffer_stream_t *fw = &parser->firmware;
-	void *mfh, *pdata;
-	unsigned long mfh_len, pdata_len;
+	void *skm, *mfh, *pdata;
+	unsigned long skm_max_len, mfh_len, pdata_len;
 	err_status_t err;
-	int mfh_status, pdata_status;
+	int skm_status, mfh_status, pdata_status;
 	uint32_t fw_version;
+
+	skm_max_len = skm_size();
+	err = bs_get_at(fw, &skm, skm_max_len, skm_offset());
+	if (is_err_status(err)) {
+		err(T("The length of firmware is not expected for ")
+		    T("searching signed key module\n"));
+		return err;
+	}
+
+	err = skm_context_new(&skm_ctx);
+	if (is_err_status(err))
+		return err;
+
+	skm_status = 0;
+	err = skm_ctx->probe(skm_ctx, skm, skm_max_len);
+	if (is_err_status(err)) {
+		skm_status = -1;
+		goto show_skm_status;
+	}
+
+show_skm_status:
+	info_cont(T("Signed key module Symptoms:\n"));
+	if (skm_status == -1)
+		info_cont(T("- Not detected\n"));
+	else {
+		switch (skm_ctx->key_type) {
+		case CSBH_KEY_TYPE_NONE:
+			info_cont(T("- No signed key module detected\n"));
+			break;
+		case CSBH_KEY_TYPE_X102xD:
+			info_cont(T("- Signed key module for X1020D/X1021D detected\n"));
+			break;
+		case CSBH_KEY_TYPE_X102x:
+			info_cont(T("- Signed key module for X1020 or X1021 detected\n"));
+			break;
+		}
+	}
 
 	err = bs_get_at(fw, &mfh, mfh_header_size(), mfh_offset());
 	if (is_err_status(err)) {
@@ -399,10 +448,6 @@ cln_fw_parser_diagnose_firmware(cln_fw_parser_t *parser)
 	err = mfh_ctx->firmware_version(mfh_ctx, &fw_version);
 	if (!is_err_status(err))
 		mfh_status |= MFH_FLASH_ITEM_FW_VERSION;
-
-	/* TODO: Check the key module signed with the stage 1 key
-	 * for X1020/X1021.
-	 */
 
 show_mfh_status:
 	info_cont(T("MFH Symptoms:\n"));

@@ -25,6 +25,9 @@
 	const __typeof__(((type *)0)->member) *__ptr = (ptr);	\
 	(type *)((char *)__ptr - offsetof(type, member));})
 
+#define align_up(x, n)	(((x) + ((n) - 1)) & ~((n) - 1))
+#define aligned(x, n)	(!!((x) & ((n) - 1)))
+
 typedef struct {
 	bcll_t link;
 	buffer_stream_t bs;
@@ -34,6 +37,7 @@ typedef struct {
 	buffer_stream_t firmware;
 	buffer_stream_t mfh;
 	buffer_stream_t pdata;
+	buffer_stream_t skm;
 	/* For output */
 	buffer_stream_t pdata_header;
 	void *pdata_item;
@@ -78,6 +82,8 @@ err_status_t
 mfh_show(void *mfh_buf, unsigned long mfh_buf_len);
 err_status_t
 mfh_show_fw_version(void *mfh_buf, unsigned long mfh_buf_len);
+
+/* Signed key module functions */
 
 /* Platform Data functions */
 

@@ -58,6 +58,8 @@ struct __mfh_context {
 };
 
 err_status_t
+mfh_context_class_init(void);
+err_status_t
 mfh_context_new(mfh_context_t **ctx);
 
 #endif	/* __MFH_H__ */

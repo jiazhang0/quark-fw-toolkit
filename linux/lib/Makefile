@@ -7,6 +7,8 @@ TARGETS := $(LIB_TARGETS) $(LIB_NAME).a
 OBJS_$(LIB_NAME) = \
 	parser.o \
 	mfh.o \
+	skm.o \
+	csbh.o \
 	platform_data.o \
 	capsule.o \
 	crc32.o \
@@ -14,7 +16,8 @@ OBJS_$(LIB_NAME) = \
 	linux.o \
 	util.o \
 	handle.o \
-	class.o
+	class.o \
+	init.o
 OBJS := $(OBJS_$(LIB_NAME))
 
 CFLAGS += -fpic -DBYTE_STREAM_ERROR_BASE=0x10000 \

@@ -13,6 +13,7 @@
 #include <eee.h>
 #include "internal.h"
 #include "bcll.h"
+#include "skm.h"
 
 err_status_t
 cln_fw_handle_open(cln_fw_handle_t *handle, void *fw, unsigned long fw_len)
@@ -47,6 +48,27 @@ cln_fw_handle_close(cln_fw_handle_t handle)
 	cln_fw_parser_destroy((cln_fw_parser_t *)handle);
 }
 
+
+static void
+show_skm(void *skm_buf, unsigned long skm_buf_len)
+{
+	skm_context_t *skm = NULL;
+	err_status_t err;
+
+	err = skm_context_new(&skm);
+	if (is_err_status(err))
+		return;
+
+	err = skm->probe(skm, skm_buf, skm_buf_len);
+	if (is_err_status(err)) {
+		skm->destroy(skm);
+		return;
+	}
+
+	skm->show(skm);
+	skm->destroy(skm);
+}
+
 void
 cln_fw_handle_show_all(cln_fw_handle_t handle)
 {
@@ -66,8 +88,16 @@ cln_fw_handle_show_all(cln_fw_handle_t handle)
 	}
 
 	bs = &parser->pdata;
-	if (!bs_empty(bs))
+	if (!bs_empty(bs)) {
 		platform_data_show(bs_head(bs), bs_size(bs));
+		info_cont(T("\n"));
+	}
+
+	bs = &parser->skm;
+	if (!bs_empty(bs)) {
+		show_skm(bs_head(bs), bs_size(bs));
+		info_cont(T("\n"));
+	}
 }
 
 err_status_t

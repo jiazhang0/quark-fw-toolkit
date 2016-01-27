@@ -421,6 +421,7 @@ mfh_context_ctor(void *ctx)
 {
 	mfh_context_t *mfh_ctx = ctx;
 
+	eee_memset(mfh_ctx, 0, sizeof(*mfh_ctx));
 	mfh_ctx->probe = probe_mfh;
 	mfh_ctx->destroy = destroy_mfh;
 	mfh_ctx->firmware_version = get_firmware_version;
@@ -432,16 +433,8 @@ mfh_context_ctor(void *ctx)
 err_status_t
 mfh_context_new(mfh_context_t **ctx)
 {
-	mfh_context_t *mfh_ctx;
-	err_status_t err;
-
 	if (!ctx)
 		return CLN_FW_ERR_INVALID_PARAMETER;
-
-	err = class_register("mfh_context_t", NULL, mfh_context_ctor,
-			     mfh_context_dtor, sizeof(*mfh_ctx));
-	if (is_err_status(err) && (err != CLASS_ERR_REGISTERED))
-		return err;
 
 	return obj_new("mfh_context_t", ctx);
 }
@@ -461,3 +454,10 @@ mfh_set_flash_item_bootable(mfh_context_t *mfh_ctx, mfh_flash_item_type_t type,
 	return CLN_FW_ERR_NONE;
 }
 #endif
+
+err_status_t
+mfh_context_class_init(void)
+{
+	return class_register("mfh_context_t", NULL, mfh_context_ctor,
+			      mfh_context_dtor, sizeof(mfh_context_t));
+}
