@@ -1,7 +1,7 @@
 /*
  * Firmware Tool for Intel Clanton SoC
  *
- * Copyright (c) 2015 Wind River Systems, Inc.
+ * Copyright (c) 2015-2016 Wind River Systems, Inc.
  *
  * See "LICENSE" for license terms.
  *
@@ -25,7 +25,7 @@ show_banner(void)
 {
 	info_cont(T("\nFirmware Tool for Intel Clanton SoC ")
 		  T("(Intel Quark SoC X1000 series)\n"));
-	info_cont(T("Copyright (c) 2015 ")
+	info_cont(T("Copyright (c) 2015-2016 ")
 		  T("Wind River Systems, Inc.\n"));
 	info_cont(T("Author: Lans Zhang <jia.zhang@windriver.com>\n"));
 	info_cont(T("Version: %s\n\n"), T(VERSION));

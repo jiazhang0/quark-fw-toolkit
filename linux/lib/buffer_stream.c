@@ -1,7 +1,7 @@
 /*
  * Byte stream buffer abstraction
  *
- * Copyright (c) 2015 Wind River Systems, Inc.
+ * Copyright (c) 2015-2016 Wind River Systems, Inc.
  *
  * See "LICENSE" for license terms.
  *

@@ -1,7 +1,7 @@
 /*
  * CRC32 implementation
  *
- * Copyright (c) 2015 Wind River Systems, Inc.
+ * Copyright (c) 2015-2016 Wind River Systems, Inc.
  *
  * See "LICENSE" for license terms.
  *
