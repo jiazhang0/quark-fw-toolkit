@@ -203,6 +203,12 @@ main(int argc, tchar_t *argv[])
 {
 	int ret;
 
+	/*
+	 * For static link which doesn't link constructor/destructor if
+	 * without explicitly call them.
+	 */
+	libclnfw_init();
+
 	cln_fwtool_add_command(&command_help);
 	cln_fwtool_add_command(&command_sbembed);
 	cln_fwtool_add_command(&command_show);

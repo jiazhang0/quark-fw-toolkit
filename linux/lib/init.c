@@ -16,10 +16,15 @@
 #include "mfh.h"
 #include "skm.h"
 
-void __attribute ((constructor))
+static int initialized;
+
+void __attribute__ ((constructor))
 libclnfw_init(void)
 {
 	err_status_t err;
+
+	if (initialized)
+		return;
 
 	err = mfh_context_class_init();
 	if (is_err_status(err)) {
@@ -38,6 +43,8 @@ libclnfw_init(void)
 		err(T("Failed to register skm_context_t\n"));
 		return;
 	}
+
+	initialized = 1;
 }
 
 void __attribute__((destructor))

@@ -38,6 +38,9 @@ typedef enum {
 #define CLN_FW_ERR_MFH_FLASH_ITEM_NOT_FOUND	CLN_FW_ERR(7)
 #define CLN_FW_ERR_INVALID_CSBH			CLN_FW_ERR(8)
 
+extern void __attribute__ ((constructor))
+libclnfw_init(void);
+
 /* Handle routines */
 err_status_t
 cln_fw_handle_open(cln_fw_handle_t *handle, void *fw, unsigned long fw_len);
