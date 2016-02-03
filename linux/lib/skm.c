@@ -17,7 +17,7 @@
 #include "skm.h"
 
 #define SKM_SIZE		(32 * 1024)
-#define SKM_OFFSET		(0x28000)
+#define SKM_OFFSET		(-0x28000)
 
 #pragma pack(1)
 
