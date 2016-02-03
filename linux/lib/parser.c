@@ -389,7 +389,7 @@ cln_fw_parser_diagnose_firmware(cln_fw_parser_t *parser)
 	}
 
 show_skm_status:
-	info_cont(T("Signed key module Symptoms:\n"));
+	info_cont(T("\nSigned key module symptoms:\n"));
 	if (skm_status == -1)
 		info_cont(T("- Not detected\n"));
 	else {
@@ -404,6 +404,14 @@ show_skm_status:
 			info_cont(T("- Signed key module for X1020 or X1021 detected\n"));
 			break;
 		}
+
+		info_cont(T("Diagnosis result:\n"));
+		if (skm_ctx->key_type == CSBH_KEY_TYPE_X102x)
+			info_cont(T("- You may need to contact hardware vendor ")
+				  T("for help to generate the signed capsule ")
+				  T("images and firmware image\n"));
+		else
+			info_cont(T("- N/A\n"));
 	}
 
 	err = bs_get_at(fw, &mfh, mfh_header_size(), mfh_offset());
@@ -425,10 +433,6 @@ show_skm_status:
 		goto show_mfh_status;
 	}
 
-	/*
-	 * TODO: check whether using the key module signed with the
-	 * open stage 1 private key.
-	 */
 	err = mfh_ctx->find_item(mfh_ctx, mfh_bootloader_signed, NULL, NULL);
 	if (!is_err_status(err))
 		mfh_status |= MFH_FLASH_ITEM_SIGNED_BOOTLOADER;
@@ -450,7 +454,7 @@ show_skm_status:
 		mfh_status |= MFH_FLASH_ITEM_FW_VERSION;
 
 show_mfh_status:
-	info_cont(T("MFH Symptoms:\n"));
+	info_cont(T("\nMFH Symptoms:\n"));
 	if (mfh_status == -1)
 		info_cont(T("- Not detected\n"));
 	else {
@@ -487,7 +491,6 @@ show_mfh_status:
 	}
 
 	pdata_status = 0;
-
 	err = platform_data_probe(pdata, &pdata_len);
 	if (is_err_status(err)) {
 		pdata_status = -1;
