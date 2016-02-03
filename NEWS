@@ -1,3 +1,12 @@
+Version 0.1.6
+=============
+Released: 2016-02-03
+
+Add the diagnosis result for skm
+Fix the unnormal behavior when using the static link
+Fix the wrong offset used to probe skm
+Add the detection for the signed key module
+
 Version 0.1.5
 =============
 Released: 2015-12-28
