@@ -32,7 +32,7 @@ Usage
 # cln_fwtool diagnosis
 
 - Show the information of firmware image
-$ cln_fwtool show
+$ cln_fwtool show test/Flash-crosshill-8M-secure.bin
 
 - Embed UEFI secure boot keys to a firmware image
 $ cln_fwtool sbembed Flash-crosshill-8M-secure.bin \
