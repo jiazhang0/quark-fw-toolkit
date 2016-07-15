@@ -1,4 +1,5 @@
 *.o
+*.so
 *.so.*
 *.a
 cln_fwtool
